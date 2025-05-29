@@ -77,4 +77,4 @@ Na pasta `/postmanCollection` encontra-se a **coleção `.json`** com todos os e
 
 
 ## Elementos do Grupo
-- António Manuel Ferreira Lopes dos Santos Filipe - nº 044351 @AmFilipe
+- António Manuel Ferreira Lopes dos Santos Filipe - nº 044351  [@António Filipe](https://github.com/@AmFilipe)
