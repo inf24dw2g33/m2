@@ -11,7 +11,10 @@
 
 ## Descrição Resumida do Tema
 
-Este projeto consiste no desenvolvimento de uma API REST para uma plataforma de marcação de consultas médicas online. A aplicação permite a gestão de utilizadores, médicos, especialidades e marcações, com suporte a autenticação via OAuth 2.0 (Google Login) e autorização baseada em tokens JWT.
+Este projeto é uma solução completa para uma plataforma de marcação de consultas médicas online, composta por:
+
+- Frontend: Uma Single-Page Application (SPA) desenvolvida em React, proporcionando uma experiência de utilizador fluida e interativa para pacientes e profissionais de saúde.
+- Backend: Uma API REST que serve como o núcleo da plataforma, responsável pela gestão de utilizadores, médicos, especialidades e marcações. A segurança é garantida através de um fluxo de autenticação com OAuth 2.0 (Google Login) e autorização de acesso a rotas protegidas via tokens JWT.
 
 ## Organização do repositório
 
