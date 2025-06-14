@@ -24,7 +24,7 @@ O repositório está organizado da seguinte forma:
 
 ## Testes com Postman
 
-Na pasta `/postmanCollection` encontra-se a **coleção `.json`** com todos os endpoints da API prontos a serem testados via Postman.
+Na pasta `/postmanCollection` encontra-se a **co[leção `.json`** com todos os endpoints da API prontos a serem testados via Postman.
 
 ## Galeria
 
@@ -50,6 +50,9 @@ Na pasta `/postmanCollection` encontra-se a **coleção `.json`** com todos os e
 - [Express.js](https://expressjs.com/)
 - [Sequelize](https://sequelize.org/)
 - [Passport](https://www.passportjs.org/concepts/authentication/strategies/)
+- [React](https://react.dev/)
+- [Axios](https://axios-http.com/docs/intro)
+- [Lucide React](https://lucide.dev/guide/packages/lucide-react)
 
 ## Relatório
 
