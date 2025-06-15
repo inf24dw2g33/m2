@@ -7,7 +7,7 @@
     justify-content: center;
     align-items: flex-start; /* Alinha ao topo para que o conteúdo não fique no centro vertical */
     min-height: 100vh; /* Garante que o contêiner ocupa a altura total da viewport */
-    /*background-color: #f0f2f5; /* Um cinza claro suave para o fundo */
+    /* background-color: #f0f2f5; /* Um cinza claro suave para o fundo */
     padding: 20px; /* Espaçamento interno */
     box-sizing: border-box; /* Garante que padding não adicione largura/altura extra */
 }
@@ -16,13 +16,13 @@
 .medicos-table,
 .consultas-table,
 .users-table,
-.especialidades-card {
+.especialidades-card { /* <--- ESSA É A CLASSE DO SEU CARD BRANCO */
     background-color: #fff; /* Fundo branco para os cartões */
     border-radius: 8px; /* Cantos arredondados */
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sombra suave para profundidade */
     padding: 30px; /* Espaçamento interno maior */
     width: 100%;
-    /*max-width: 1200px; /* Largura máxima para tabelas grandes */
+    /* max-width: 1200px; /* Largura máxima para tabelas grandes */
     max-width: 90%;
     margin: 20px; /* Margem externa */
 }
@@ -51,6 +51,20 @@ h2 {
     border: 1px solid #eee;
     align-items: center; /* Alinha itens verticalmente */
 }
+
+/* Novo estilo para o formulário de edição de especialidades */
+.especialidade-edit-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px; /* Espaçamento menor para formulários dentro de detalhes */
+    align-items: center;
+    background-color: #e6f7ff; /* Fundo diferente para indicar modo de edição */
+    padding: 10px 15px;
+    border-radius: 5px;
+    border: 1px solid #91d5ff;
+    margin-top: 10px; /* Espaçamento acima do formulário de edição */
+}
+
 
 /* -- Inputs e Selects -- */
 .medico-input,
@@ -89,6 +103,10 @@ h2 {
     font-weight: 500;
     transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
     white-space: nowrap; /* Evita que o texto do botão quebre */
+    display: flex; /* Para alinhar ícones e texto */
+    align-items: center;
+    justify-content: center;
+    gap: 8px; /* Espaço entre ícone e texto */
 }
 
 /* Cores dos botões */
@@ -184,8 +202,28 @@ h2 {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+/* Novo estilo para o botão de "Ver Detalhes" em EspecialidadesList */
+.especialidade-btn.view-details {
+    background: none;
+    border: 1px solid #007bff;
+    color: #007bff;
+    padding: 8px; /* Reduzido para ícones */
+    border-radius: 50%; /* Torna-o redondo */
+    width: 36px; /* Tamanho fixo para ser redondo */
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0; /* Evita que encolha */
+}
+.especialidade-btn.view-details:hover {
+    background-color: #e7f4ff;
+    border-color: #0056b3;
+    color: #0056b3;
+}
 
-/* -- Tabelas -- */
+
+/* -- Tabelas (para Medicos, Consultas, Users) -- */
 table {
     width: 100%;
     border-collapse: collapse; /* Remove espaçamento entre células */
@@ -241,66 +279,111 @@ tbody td .user-input {
     font-size: 0.95rem;
     margin-bottom: 5px; /* Espaçamento entre inputs e botões de editar/salvar */
 }
-/* Especialidades list - específicos */
+
+/* -- EspecialidadesList - Estilos Específicos -- */
+/* A lista UL que contém os itens de especialidade */
 .especialidades-list {
-    list-style: none;
+    list-style: none; /* Remove os marcadores padrão */
     padding: 0;
+    margin: 0;
+    /* Optional: Adicione uma borda leve para agrupar os itens da lista dentro do card */
+    border: 1px solid #eee;
+    border-radius: 5px;
+    overflow: hidden; /* Importante para que os border-radius funcionem nos itens */
 }
 
-.especialidade-link-item {
+/* Cada item LI da lista de especialidades */
+.especialidade-item {
     border-bottom: 1px solid #eee;
-    padding: 15px 0;
+    padding: 15px;
+    display: flex;
+    flex-direction: column; /* Organiza o cabeçalho e detalhes em coluna */
 }
 
-.especialidade-link-item:last-child {
-    border-bottom: none;
+.especialidade-item:last-child {
+    border-bottom: none; /* Remove a linha de baixo do último item */
 }
 
-.especialidade-link {
-    display: block; /* Para o botão ocupar toda a largura e ser clicável */
+/* O cabeçalho de cada item de especialidade (clicável para expandir) */
+.especialidade-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: 500;
+    color: #333;
+    /* transition: background-color 0.2s ease; */ /* Opcional: efeito hover no header */
 }
 
-.especialidade-opcoes {
-    border-left: 3px solid #007bff;
-    padding-left: 15px;
+/* .especialidade-header:hover {
+    background-color: #f9f9f9;
+} */
+
+
+/* A área de detalhes da especialidade (quando expandida) */
+.especialidade-details {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px dashed #ddd; /* Linha tracejada para separar o header dos detalhes */
+}
+
+/* Linha de botões de ação dentro dos detalhes (Editar, Eliminar) */
+.especialidade-actions-row {
+    display: flex;
+    gap: 10px;
     margin-top: 10px;
+    justify-content: flex-end; /* Alinha os botões à direita */
 }
 
-.especialidade-opcoes ul {
-    list-style: none; /* Remove os marcadores (pontos) */
-    padding-left: 0;   /* Remove o padding padrão da lista */
-    margin-top: 10px;
-    display: flex;     /* Usa flexbox para que os itens fiquem na mesma linha */
-    flex-wrap: wrap;   /* Permite que os itens quebrem para a próxima linha se não houver espaço */
-    gap: 10px;         /* Adiciona espaçamento entre os nomes dos médicos */
+/* Estilo para a lista de médicos dentro dos detalhes da especialidade */
+.especialidade-details strong {
+    display: block; /* Para o título "Médicos desta especialidade" ficar em sua própria linha */
+    margin-bottom: 8px;
+    color: #555;
+    font-size: 1em;
 }
 
-.especialidade-opcoes ul li {
-    display: inline-block; /* Faz com que os itens se comportem como blocos em linha */
+.especialidade-details ul { /* A UL dos médicos */
+    list-style: none; /* Removido para ter controle total */
+    padding-left: 0;
+    margin-top: 0; /* Ajustado para não ter margem extra */
+    display: flex;
+    flex-wrap: wrap; /* Permite quebrar em várias linhas */
+    gap: 8px; /* Espaçamento entre os "chips" de médico */
+}
+
+.especialidade-details ul li { /* Cada LI (nome do médico) */
     background-color: #e0f7fa; /* Um fundo suave para cada nome de médico */
     padding: 5px 10px;
-    border-radius: 4px;
+    border-radius: 20px; /* Formato de "pill" para os nomes */
     color: #00796b; /* Cor do texto */
-    font-size: 0.9em;
+    font-size: 0.85em; /* Tamanho da fonte menor */
     white-space: nowrap; /* Evita que o nome do médico quebre em várias linhas */
     border: 1px solid #b2ebf2; /* Uma borda suave */
+    display: inline-flex; /* Para garantir que padding e border se apliquem bem */
+    align-items: center;
 }
+
 
 .sem-medicos {
     color: #888;
     font-style: italic;
     margin-top: 5px;
+    font-size: 0.9em;
 }
 
 /* -- Mensagens de Erro/Carregamento -- */
+/* Estes estilos já estão a aplicar-se aos cards (users-table, especialidades-card, etc.) */
 .medicos-table,
 .consultas-table,
 .users-table,
 .especialidades-card {
+    /* ... (estilos de card já definidos acima, incluindo text-align: center para carregamento/erro) ... */
     text-align: center; /* Centraliza "A carregar..." e "Erro..." */
     font-size: 1.2em;
     color: #666;
-    padding: 50px;
+    /* padding: 50px; /* Pode ser removido se o padding geral do card for suficiente */
 }
 
 /* -- Responsividade básica -- */
@@ -316,7 +399,8 @@ tbody td .user-input {
     .medico-form,
     .consulta-form,
     .user-form,
-    .especialidade-form {
+    .especialidade-form,
+    .especialidade-edit-form { /* Inclua aqui o formulário de edição de especialidades */
         flex-direction: column; /* Empilha os campos em telas pequenas */
         align-items: stretch;
     }
@@ -333,6 +417,7 @@ tbody td .user-input {
         min-width: unset; /* Remove o min-width para preencher 100% */
     }
 
+    /* Estilos de tabela responsiva */
     table, thead, tbody, th, td, tr {
         display: block; /* Faz a tabela parecer uma lista de cartões */
     }
@@ -372,6 +457,7 @@ tbody td .user-input {
     }
 }
 
+/* -- Estilos de Usuário (expandido) -- */
 /* Estilo para a linha do utilizador que é clicável */
 .user-list-item-header {
     cursor: pointer;

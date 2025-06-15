@@ -1,4 +1,5 @@
 import React from 'react';
+import googleIcon from '../imagem/google.png';
 
 function Login() {
   const handleLogin = () => {
@@ -8,9 +9,14 @@ function Login() {
   return (
     <div>
       <h2>Login com Google</h2>
-      <button onClick={handleLogin}>
-      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"
-        style={{ height: '18px', verticalAlign: 'middle', marginRight: '6px' }} />Entrar com Google</button>
+       <button onClick={handleLogin} style={{ /* Adicione algum estilo para o botão */ }}>
+        <img
+          src={googleIcon} // Usa a imagem importada
+          alt="Google"
+          style={{ height: '18px', verticalAlign: 'middle', marginRight: '6px' }}
+        />
+        Entrar com Google
+      </button>
     </div>
   );
 }

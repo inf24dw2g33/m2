@@ -1,0 +1,10 @@
+# Para a aplicação backend
+docker build -t inf24dw1g32/node:latest
+docker push inf24dw1g32/node:latest
+
+# Para a aplicação frontend
+docker build -t inf24dw1g32/react:latest
+docker push inf24dw1g32/react:latest
+
+docker build -t inf24dw1g32/mysql:latest
+docker push inf24dw1g32/mysql:latest

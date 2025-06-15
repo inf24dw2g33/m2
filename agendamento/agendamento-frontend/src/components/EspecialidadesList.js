@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import './components.css';
 import api from '../api/api';
-// Importar os ícones do lucide-react
-import { Trash2, Edit, Save, X, PlusCircle, Eye } from 'lucide-react';
 
 function EspecialidadesList({ user, showMessage }) {
   const [specialties, setSpecialties] = useState([]);
   const [expandedId, setExpandedId] = useState(null);
-  const [doctors, setDoctors] = useState([]); // Agora 'doctors' é o estado para os médicos da especialidade expandida
+  // Renomear 'doctors' para 'expandedSpecialtyDoctors' para maior clareza
+  const [expandedSpecialtyDoctors, setExpandedSpecialtyDoctors] = useState([]);
+  const [isDoctorsLoading, setIsDoctorsLoading] = useState(false); // Novo estado de carregamento para médicos
   const [erro, setErro] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [doctorsError, setDoctorsError] = useState(''); // Erro específico para médicos
+  const [loading, setLoading] = useState(true); // Carregamento inicial de especialidades
 
   // Estados para adicionar/editar
   const [newName, setNewName] = useState('');
@@ -23,7 +24,7 @@ function EspecialidadesList({ user, showMessage }) {
 
   const fetchSpecialties = () => {
     setLoading(true);
-    const token = localStorage.getItem('jwtToken'); // Use 'jwtToken' conforme definido em App.js
+    const token = localStorage.getItem('token');
     api.get('/specialties', {
       headers: { Authorization: `Bearer ${token}` }
     })
@@ -31,51 +32,63 @@ function EspecialidadesList({ user, showMessage }) {
         const sorted = res.data.sort((a, b) => a.name.localeCompare(b.name));
         setSpecialties(sorted);
         setLoading(false);
+        setErro(''); // Limpa erro geral se a busca de especialidades for bem-sucedida
       })
       .catch(() => {
-        setErro('Erro ao carregar especialidades');
+        setErro('Erro ao carregar especialidades. Tente novamente mais tarde.');
         setLoading(false);
       });
   };
 
-  // Consulta médicos da especialidade expandida
-  const fetchDoctorsForSpecialty = (specialtyId) => {
-    const token = localStorage.getItem('jwtToken');
-    api.get(`/specialties/${specialtyId}/doctors`, { // Assumindo que você tem este endpoint no backend
+  // Consulta médicos da especialidade
+  const fetchDoctors = (id) => {
+    setIsDoctorsLoading(true); // Inicia carregamento
+    setExpandedSpecialtyDoctors([]); // Limpa a lista de médicos da especialidade atual
+    setDoctorsError(''); // Limpa qualquer erro anterior de médicos
+
+    const token = localStorage.getItem('token');
+    api.get(`/specialties/${id}`, {
       headers: { Authorization: `Bearer ${token}` }
     })
-      .then(res => setDoctors(res.data))
-      .catch(error => console.error('Erro ao carregar médicos da especialidade:', error));
+      .then(res => {
+        setExpandedSpecialtyDoctors(res.data.doctors || []);
+        setIsDoctorsLoading(false); // Finaliza carregamento com sucesso
+      })
+      .catch(() => {
+        setDoctorsError('Erro ao carregar médicos desta especialidade.');
+        setIsDoctorsLoading(false); // Finaliza carregamento com erro
+      });
   };
 
-
+  // Adicionar especialidade
   const handleAdd = (e) => {
     e.preventDefault();
-    if (!newName) {
-      showMessage && showMessage('O nome da especialidade é obrigatório.', 'error');
+    if (!newName.trim()) {
+      showMessage && showMessage('O nome da especialidade não pode ser vazio.', 'warning');
       return;
     }
-    const token = localStorage.getItem('jwtToken');
+    const token = localStorage.getItem('token');
     api.post('/specialties', { name: newName }, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(() => {
         setNewName('');
         fetchSpecialties();
-        showMessage && showMessage('Especialidade adicionada!', 'success');
+        showMessage && showMessage('Especialidade adicionada com sucesso!', 'success');
       })
       .catch(err => {
-        showMessage && showMessage(err.response?.data?.error || 'Erro ao adicionar', 'error');
+        showMessage && showMessage(err.response?.data?.error || 'Erro ao adicionar especialidade.', 'error');
       });
   };
 
+  // Editar especialidade
   const handleEdit = (e) => {
     e.preventDefault();
-    if (!editName) {
-      showMessage && showMessage('O nome da especialidade é obrigatório.', 'error');
+    if (!editName.trim()) {
+      showMessage && showMessage('O nome da especialidade não pode ser vazio.', 'warning');
       return;
     }
-    const token = localStorage.getItem('jwtToken');
+    const token = localStorage.getItem('token');
     api.put(`/specialties/${editId}`, { name: editName }, {
       headers: { Authorization: `Bearer ${token}` }
     })
@@ -83,111 +96,122 @@ function EspecialidadesList({ user, showMessage }) {
         setEditId(null);
         setEditName('');
         fetchSpecialties();
-        showMessage && showMessage('Especialidade atualizada!', 'success');
+        showMessage && showMessage('Especialidade atualizada com sucesso!', 'success');
       })
       .catch(err => {
-        showMessage && showMessage(err.response?.data?.error || 'Erro ao editar', 'error');
+        showMessage && showMessage(err.response?.data?.error || 'Erro ao atualizar especialidade.', 'error');
       });
   };
 
+  // Eliminar especialidade
   const handleDelete = (id) => {
-    if (!window.confirm('Tem certeza que quer eliminar esta especialidade?')) return;
-    const token = localStorage.getItem('jwtToken');
+    if (!window.confirm('Tem certeza que deseja eliminar esta especialidade?')) {
+      return;
+    }
+    const token = localStorage.getItem('token');
     api.delete(`/specialties/${id}`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(() => {
         fetchSpecialties();
-        showMessage && showMessage('Especialidade eliminada!', 'success');
+        showMessage && showMessage('Especialidade eliminada com sucesso!', 'success');
+        // Se a especialidade eliminada era a expandida, fechar
+        if (expandedId === id) {
+          setExpandedId(null);
+          setExpandedSpecialtyDoctors([]);
+        }
       })
       .catch(err => {
-        showMessage && showMessage(err.response?.data?.error || 'Erro ao eliminar', 'error');
+        showMessage && showMessage(err.response?.data?.error || 'Erro ao eliminar especialidade.', 'error');
       });
   };
 
-  const handleToggleDetails = (specialtyId) => {
-    setExpandedId(expandedId === specialtyId ? null : specialtyId);
-    if (expandedId !== specialtyId) {
-      fetchDoctorsForSpecialty(specialtyId); // Carregar médicos da especialidade expandida
+  // Expand/collapse especialidade
+  const handleExpand = (id) => {
+    if (expandedId === id) {
+      setExpandedId(null);
+      setExpandedSpecialtyDoctors([]); // Limpa a lista quando colapsa
+      setDoctorsError(''); // Limpa o erro de médicos
+    } else {
+      setExpandedId(id);
+      fetchDoctors(id);
     }
   };
 
-  if (loading) return <div className="especialidades-container"><div className="especialidades-list">A carregar especialidades...</div></div>;
-  if (erro) return <div className="especialidades-container"><div className="especialidades-list">{erro}</div></div>;
+  if (loading) return <div className="especialidades-container"><div className="especialidades-card">A carregar especialidades...</div></div>;
+  if (erro) return <div className="especialidades-container"><div className="especialidades-card">{erro}</div></div>;
 
   return (
     <div className="especialidades-container">
-      <div className="especialidades-list">
-        <h2>Gestão de Especialidades</h2>
+      <div className="especialidades-card">
+        <h2>Gestão de Especialidades</h2> {/* Título ajustado para corresponder à imagem */}
 
+        {/* Formulário para adicionar (apenas admin) */}
         {user?.role === 'admin' && (
           <form onSubmit={handleAdd} className="especialidade-form">
             <input
               type="text"
-              placeholder="Nome da Especialidade"
+              placeholder="Nome da Especialidade" // Placeholder ajustado para corresponder à imagem
               value={newName}
               onChange={e => setNewName(e.target.value)}
               className="especialidade-input"
-              required
             />
-            {/* BOTÃO ADICIONAR */}
-            <button type="submit" className="especialidade-btn add" title="Adicionar Especialidade">
-              <PlusCircle size={20} /> Adicionar
-            </button>
+            <button type="submit" className="especialidade-btn add">Adicionar</button>
           </form>
         )}
 
-        <ul>
+        <ul className="especialidades-list">
           {specialties.map(spec => (
-            <li key={spec.id} className="especialidade-item">
-              <div className="especialidade-header" onClick={() => handleToggleDetails(spec.id)}>
+            <li key={spec.id} className="especialidade-item"> {/* Alterado de especialidade-link-item para especialidade-item */}
+              <div className="especialidade-header" onClick={() => handleExpand(spec.id)}> {/* Adicionado div para o header clicável */}
                 <span>{spec.name}</span>
-                {/* BOTÃO PARA EXPANDIR/VER DETALHES */}
-                <button className="especialidade-btn view-details" onClick={(e) => { e.stopPropagation(); handleToggleDetails(spec.id); }} title="Ver Detalhes">
-                  <Eye size={18} />
+                <button
+                  className="especialidade-btn view-details" // Nova classe para o botão de visualização
+                  onClick={(e) => { e.stopPropagation(); handleExpand(spec.id); }} // Previne a propagação para evitar duplo clique
+                  aria-expanded={expandedId === spec.id}
+                  aria-controls={`details-${spec.id}`}
+                >
+                  {/* Ícone de olho ou seta para indicar expand/collapse */}
+                  {expandedId === spec.id ? (
+                      <i className="fa-solid fa-eye-slash"></i> // Exemplo: ícone para fechar
+                  ) : (
+                      <i className="fa-solid fa-eye"></i> // Exemplo: ícone para abrir
+                  )}
                 </button>
               </div>
+
               {expandedId === spec.id && (
-                <div className="especialidade-details">
+                <div id={`details-${spec.id}`} className="especialidade-details"> {/* Classe ajustada e ID para acessibilidade */}
                   {editId === spec.id ? (
-                    <form onSubmit={handleEdit} className="especialidade-edit-form">
+                    <form onSubmit={handleEdit} className="especialidade-edit-form"> {/* Nova classe para formulário de edição */}
                       <input
                         type="text"
                         value={editName}
                         onChange={e => setEditName(e.target.value)}
                         className="especialidade-input"
-                        required
                       />
-                      {/* BOTÃO GUARDAR */}
-                      <button type="submit" className="especialidade-btn save" title="Guardar">
-                        <Save size={18} />
-                      </button>
-                      {/* BOTÃO CANCELAR */}
-                      <button type="button" className="especialidade-btn cancel" onClick={() => setEditId(null)} title="Cancelar">
-                        <X size={18} />
-                      </button>
+                      <button type="submit" className="especialidade-btn save">Guardar</button>
+                      <button type="button" className="especialidade-btn cancel" onClick={() => setEditId(null)}>Cancelar</button>
                     </form>
                   ) : (
                     <>
                       {user?.role === 'admin' && (
-                        <div className="especialidade-actions-row">
-                          {/* BOTÃO EDITAR */}
-                          <button className="especialidade-btn edit" onClick={() => { setEditId(spec.id); setEditName(spec.name); }} title="Editar Especialidade">
-                            <Edit size={18} />
-                          </button>
-                          {/* BOTÃO ELIMINAR */}
-                          <button className="especialidade-btn delete" onClick={() => handleDelete(spec.id)} title="Eliminar Especialidade">
-                            <Trash2 size={18} />
-                          </button>
+                        <div className="especialidade-actions-row"> {/* Agrupamento de botões de ação */}
+                          <button className="especialidade-btn edit" onClick={() => { setEditId(spec.id); setEditName(spec.name); }}>Editar</button>
+                          <button className="especialidade-btn delete" onClick={() => handleDelete(spec.id)}>Eliminar</button>
                         </div>
                       )}
                       <div style={{ marginTop: 10 }}>
                         <strong>Médicos desta especialidade:</strong>
-                        {doctors.length === 0 ? (
+                        {isDoctorsLoading ? (
+                            <div className="sem-medicos">A carregar médicos...</div>
+                        ) : doctorsError ? (
+                            <div className="sem-medicos">{doctorsError}</div>
+                        ) : expandedSpecialtyDoctors.length === 0 ? ( // Usa o novo estado
                           <div className="sem-medicos">Sem médicos associados.</div>
                         ) : (
-                          <ul>
-                            {doctors.map(doc => (
+                          <ul className="doctors-list-inline"> {/* Classe adicionada para formatar como pills */}
+                            {expandedSpecialtyDoctors.map(doc => ( // Usa o novo estado
                               <li key={doc.id}>{doc.name}</li>
                             ))}
                           </ul>

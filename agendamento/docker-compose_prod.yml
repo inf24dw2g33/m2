@@ -1,11 +1,7 @@
-
 services:
   clinica_app:
     container_name: clinica_app
-    image: agendamento_app:latest
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: inf24dw1g32/node:latest
     ports:
       - "3000:3000"
     environment:
@@ -20,22 +16,17 @@ services:
     networks:
       - scheduler-network
 
-
-  clinica_web:
-    image: clinica_web:latest
+  clinica_web:    
+    image: inf24dw1g32/react:latest
     container_name: clinica_web
-    build:
-      context: ./agendamento-frontend
-      dockerfile: Dockerfile
     ports:
-      - "80:80"              
+      - "80:80"
     networks:
       - scheduler-network
 
-
   db:
     container_name: scheduler_db
-    image: mysql:8.0
+    image: inf24dw1g32/mysql:latest
     ports:
       - "3307:3306"
     environment:
@@ -45,7 +36,6 @@ services:
       MYSQL_CHARSET: utf8mb4
       MYSQL_COLLATION: utf8mb4_general_ci
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
-    #volumes:
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 25s
@@ -58,3 +48,4 @@ services:
 networks:
   scheduler-network:
     driver: bridge
+
