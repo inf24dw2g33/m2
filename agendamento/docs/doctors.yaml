@@ -1,0 +1,226 @@
+paths:
+  /doctors:
+    get:
+      summary: Retorna uma lista de médicos
+      tags: [Doctors]
+      responses:
+        200:
+          description: Lista de médicos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+        500:
+          description: Erro ao procurar médicos
+
+    post:
+      summary: Cria um novo médico
+      tags: [Doctors]
+      security:
+        - bearerAuth: [] # Requer autenticação
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: O nome do médico
+                specialty_id:
+                  type: integer
+                  description: O ID da especialidade do médico
+              required:
+                - name
+                - specialty_id
+      responses:
+        201:
+          description: Médico criado com sucesso
+        400:
+          description: Dados inválidos ou ausentes
+
+  /doctors/{id}:
+    get:
+      summary: Retorna um médico pelo ID
+      tags: [Doctors]
+      security:
+        - bearerAuth: [] # Requer autenticação
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Médico encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+        404:
+          description: Médico não encontrado
+
+    put:
+      summary: Atualiza os dados de um médico
+      tags: [Doctors]
+      security:
+        - bearerAuth: [] # Requer autenticação
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                specialty_id:
+                  type: integer
+      responses:
+        200:
+          description: Médico atualizado com sucesso
+        400:
+          description: Erro ao atualizar médico
+        404:
+          description: Médico não encontrado
+
+    delete:
+      summary: Elimina um médico pelo ID
+      tags: [Doctors]
+      security:
+        - bearerAuth: [] # Requer autenticação  
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Médico removido com sucesso
+        404:
+          description: Médico não encontrado
+
+  /doctors/{id}/appointments:
+    get:
+      summary: Retorna todas as consultas e pacientes de um médico específico
+      description: |
+        Lista todas as consultas agendadas com um médico cujo ID é especificado no caminho,
+        incluindo os detalhes dos pacientes associados a cada consulta,
+        bem como os detalhes do médico e a sua especialidade.
+        Esta rota requer autenticação. A lógica de autorização (ex: apenas admin ou o próprio médico)
+        deve ser implementada no backend.
+      tags:
+        - Doctors
+
+      security:
+        - bearerAuth: [] # Indica que este endpoint requer autenticação (token Bearer)
+
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: O ID do médico cujas consultas e pacientes devem ser retornados
+          schema:
+            type: integer # Assumimos que o ID do médico é um inteiro
+
+      responses:
+        200:
+          description: Lista de consultas com pacientes encontrada
+          content:
+            application/json:
+              schema:
+                type: array # A resposta é uma lista (um array) de consultas
+                items: # Define o esquema para cada item dentro do array (cada consulta)
+                  type: object
+                  properties:
+                    # Usando 'consultaId' conforme o seu código
+                    consultaId:
+                      type: integer
+                      description: O ID da consulta
+                    date:
+                      type: string
+                      format: date # Indica que é apenas a parte da data (ex: 2023-10-27)
+                      description: A data da consulta
+                    time:
+                      type: string
+                      format: time # Indica que é apenas a parte da hora (ex: 10:00:00)
+                      description: A hora da consulta
+                    notes:
+                      type: string
+                      description: Notas ou descrição da consulta (opcional)
+                      nullable: true # Indica que este campo pode ser nulo
+
+                    # Os dados do paciente (utilizador) aninhados, usando o alias 'paciente'
+                    paciente:
+                      type: object
+                      description: Os detalhes do paciente (utilizador) associado a esta consulta
+                      properties: # Define os campos que serão incluídos para o paciente
+                        id:
+                          type: integer
+                          description: O ID do paciente
+                        name:
+                          type: string
+                          description: O nome do paciente
+                        email:
+                          type: string
+                          format: email # Formato específico para endereços de email
+                          description: O email do paciente
+                        # Inclua aqui quaisquer outros campos do User que sejam retornados na query
+
+                    # Os dados do médico aninhados, usando o alias 'medico'
+                    medico:
+                      type: object
+                      description: Os detalhes do médico associado a esta consulta
+                      properties:
+                        id:
+                          type: integer
+                          description: O ID do médico
+                        name:
+                          type: string
+                          description: O nome do médico
+                        # Inclui a especialidade do médico aninhada, usando o alias 'specialty'
+                        specialty:
+                          type: object
+                          description: A especialidade do médico
+                          properties:
+                            id:
+                              type: integer
+                              description: O ID da especialidade
+                            name:
+                              type: string
+                              description: O nome da especialidade
+
+        401:
+          description: Não autenticado. O token de autenticação está ausente ou inválido.
+
+        403:
+          description: Acesso negado. O utilizador autenticado não tem permissão para aceder a estas consultas (ex: não é admin, nem o médico em questão).
+  
+
+        404:
+          description: Médico não encontrado com o ID fornecido.
+
+        500:
+          description: Erro interno do servidor ao processar a requisição.
+  

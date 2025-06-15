@@ -1,0 +1,213 @@
+tags:
+  - name: Appointments
+    description: Operações relacionadas com os agendamentos
+
+paths:
+  /appointments:
+    get:
+      summary: Retorna uma lista de consultas
+      tags:
+        - Appointments
+      security:
+        - bearerAuth: [] # Requer autenticação  
+      responses:
+        200:
+          description: Lista de consultas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      description: O ID da consulta
+                    data:
+                      type: string
+                      format: date-time
+                      description: A data e hora da consulta
+                    descricao:
+                      type: string
+                      description: Descrição da consulta (opcional)
+                    specialty: 
+                      type: object
+                      description: A especialidade da consulta
+                      properties:
+                        id:
+                          type: integer
+                          description: O ID da especialidade
+                        name:
+                          type: string
+                          description: O nome da especialidade
+        500:
+          description: Erro interno do servidor
+
+    post:
+      summary: Cria uma nova consulta
+      tags:
+        - Appointments
+      security:
+        - bearerAuth: [] # Requer autenticação
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - data
+                - pacienteId
+                - medicoId
+              properties:
+                data:
+                  type: string
+                  format: date-time
+                  description: A data e hora da consulta
+                descricao:
+                  type: string
+                  description: Descrição da consulta (opcional)
+                pacienteId:
+                  type: integer
+                  description: O ID do paciente relacionado
+                medicoId:
+                  type: integer
+                  description: O ID do médico relacionado
+                especialidadeId:
+                  type: integer
+                  description: O ID da especialidade desejada para a consulta
+      responses:
+        201:
+          description: Consulta criada com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  data:
+                    type: string
+                    format: date-time
+                  descricao:
+                    type: string
+                  pacienteId:
+                    type: integer
+                  medicoId:
+                    type: integer
+                  especialidadeId:
+                    type: integer
+                    
+        400:
+          description: Dados inválidos ou ausentes
+        500:
+          description: Erro interno do servidor
+
+  /appointments/{id}:
+    get:
+      summary: Retorna uma consulta pelo ID
+      tags:
+        - Appointments
+      security:
+        - bearerAuth: [] # Requer autenticação
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID da consulta a ser retornada
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Consulta encontrada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  data:
+                    type: string
+                    format: date-time
+                  descricao:
+                    type: string
+                  pacienteId:
+                    type: integer
+                  medicoId:
+                    type: integer
+        404:
+          description: Consulta não encontrada
+        500:
+          description: Erro interno do servidor
+
+    put:
+      summary: Atualiza os dados de uma consulta
+      tags:
+        - Appointments
+      security:
+        - bearerAuth: [] # Requer autenticação
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID da consulta a ser atualizada
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - data
+                - pacienteId
+                - medicoId
+              properties:
+                data:
+                  type: string
+                  format: date-time
+                  description: Nova data e hora da consulta
+                descricao:
+                  type: string
+                  description: Nova descrição da consulta (opcional)
+                pacienteId:
+                  type: integer
+                  description: Novo ID do paciente
+                medicoId:
+                  type: integer
+                  description: Novo ID do médico
+                especialidadeId:
+                  type: integer
+                  description: Novo ID da especialidade
+      responses:
+        200:
+          description: Consulta atualizada com sucesso
+        400:
+          description: Dados inválidos ou ausentes
+        404:
+          description: Consulta não encontrada
+        500:
+          description: Erro interno do servidor
+
+    delete:
+      summary: Elimina uma consulta pelo ID
+      tags:
+        - Appointments
+      security:
+        - bearerAuth: [] # Requer autenticação
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID da consulta a ser eliminada
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Consulta removida com sucesso
+        404:
+          description: Consulta não encontrada
+        500:
+          description: Erro interno do servidor

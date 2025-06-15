@@ -1,0 +1,194 @@
+tags:
+  - name: Specialties
+    description: Operações relacionadas a especialidades médicas
+
+paths:
+  /specialties:
+    get:
+      summary: Retorna uma lista de todas as especialidades
+      description: Acessível a qualquer utilizador autenticado.
+      tags: [Specialties]
+      responses:
+        200:
+          description: Lista de especialidades retornada com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      description: O ID da especialidade
+                    name:
+                      type: string
+                      description: O nome da especialidade
+        401:
+          description: Não autenticado
+        500:
+          description: Erro interno do servidor
+
+    post:
+      summary: Cria uma nova especialidade
+      description: Apenas acessível por utilizadores com a role 'admin'.
+      tags: [Specialties]
+      security:
+        - bearerAuth: [] # Requer autenticação
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: O nome da nova especialidade
+              required:
+                - name # O campo 'name' é obrigatório no corpo da requisição
+      responses:
+        201:
+          description: Especialidade criada com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    description: O ID da nova especialidade criada
+                  name:
+                    type: string
+                    description: O nome da nova especialidade criada
+        400:
+          description: Dados inválidos ou ausentes (ex: nome faltando ou já existe)
+        401:
+          description: Não autenticado
+        403:
+          description: Acesso negado (utilizador não é admin)
+        500:
+          description: Erro interno do servidor
+
+  /specialties/{id}:
+    get:
+      summary: Retorna uma especialidade pelo ID
+      description: Acessível a qualquer utilizador autenticado.
+      tags: [Specialties]
+      security:
+        - bearerAuth: [] # Requer autenticação
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: O ID da especialidade a ser retornada
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Especialidade encontrada e retornada com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    description: O ID da especialidade
+                  name:
+                    type: string
+                    description: O nome da especialidade
+                  doctors:
+                    type: array
+                    description: Lista de médicos associados a esta especialidade
+                    items: # Define a estrutura de cada item no array (cada médico)
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          description: O ID do médico
+                        name:
+                          type: string
+                          description: O nome do médico
+        401:
+          description: Não autenticado
+        404:
+          description: Especialidade não encontrada
+        500:
+          description: Erro interno do servidor
+
+    put:
+      summary: Atualiza uma especialidade pelo ID
+      description: Apenas acessível por utilizadores com a role 'admin'.
+      tags: [Specialties]
+      security:
+        - bearerAuth: [] # Requer autenticação
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: O ID da especialidade a ser atualizada
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: O novo nome da especialidade
+              required:
+                - name # O campo 'name' é obrigatório para atualização
+      responses:
+        200:
+          description: Especialidade atualizada com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    description: O ID da especialidade atualizada
+                  name:
+                    type: string
+                    description: O nome atualizado da especialidade
+        400:
+          description: Dados inválidos ou ausentes (ex: nome faltando ou já existe)
+        401:
+          description: Não autenticado
+        403:
+          description: Acesso negado (utilizador não é admin)
+        404:
+          description: Especialidade não encontrada
+        500:
+          description: Erro interno do servidor
+
+    delete:
+      summary: Elimina uma especialidade pelo ID
+      description: Apenas acessível por utilizadores com a role 'admin'.
+      tags: [Specialties]
+      security:
+        - bearerAuth: [] # Requer autenticação
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: O ID da especialidade a ser eliminada
+          schema:
+            type: integer
+      responses:
+        204:
+          description: Especialidade removida com sucesso (No Content)
+        401:
+          description: Não autenticado
+        403:
+          description: Acesso negado (utilizador não é admin)
+        404:
+          description: Especialidade não encontrada
+        500:
+          description: Erro interno do servidor (ex: devido a restrições de chave estrangeira se houver médicos associados e a regra ON DELETE não for CASCADE/SET NULL)
+

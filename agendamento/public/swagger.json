@@ -1,0 +1,1550 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API de Agendamento de Consultas",
+    "version": "1.0.0",
+    "description": "Documentação da API"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000"
+    }
+  ],
+  "paths": {
+    "/users": {
+      "get": {
+        "summary": "Retorna uma lista de pacientes",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de pacientes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "description": "O ID do paciente"
+                      },
+                      "nome": {
+                        "type": "string",
+                        "description": "O nome do paciente"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro ao buscar pacientes"
+          }
+        }
+      },
+      "post": {
+        "summary": "Cria um novo paciente",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "O nome completo do utilizador.",
+                    "example": "João Silva"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "O endereço de email único do utilizador.",
+                    "example": "joao.silva@example.com"
+                  },
+                  "google_id": {
+                    "type": "string",
+                    "description": "O identificador único do utilizador fornecido pelo Google (após autenticação OAuth2).",
+                    "example": "118005194401585621327"
+                  }
+                },
+                "required": [
+                  "name",
+                  "email",
+                  "google_id"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Utilizador criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "description": "O ID único do utilizador criado."
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "O nome do utilizador."
+                    },
+                    "email": {
+                      "type": "string",
+                      "format": "email",
+                      "description": "O email do utilizador."
+                    },
+                    "google_id": {
+                      "type": "string",
+                      "description": "O Google ID do utilizador."
+                    },
+                    "role": {
+                      "type": "string",
+                      "description": "O papel do utilizador no sistema (ex: 'user', 'admin').",
+                      "enum": [
+                        "user",
+                        "admin"
+                      ]
+                    }
+                  },
+                  "example": {
+                    "id": 1,
+                    "name": "João Silva",
+                    "email": "joao.silva@example.com",
+                    "google_id": "118005194401585621327",
+                    "role": "user"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Pedido inválido (ex: campos obrigatórios faltando, email ou Google ID já existem)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Mensagem de erro detalhada."
+                    }
+                  },
+                  "example": {
+                    "error": "Campos obrigatórios faltando: name, email, google_id."
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor ao criar o utilizador.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Mensagem de erro detalhada."
+                    }
+                  },
+                  "example": {
+                    "error": "Erro interno do servidor ao criar utilizador."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "summary": "Retorna um paciente pelo ID",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID do paciente a ser retornado",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paciente encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "nome": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Paciente não encontrado"
+          }
+        }
+      },
+      "put": {
+        "summary": "Atualiza os dados de um paciente",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID do paciente a ser atualizado",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "O nome do paciente"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Paciente atualizado com sucesso"
+          },
+          "400": {
+            "description": "Erro ao atualizar paciente"
+          },
+          "404": {
+            "description": "Paciente não encontrado"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Elimina um paciente pelo ID",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID do paciente a ser eliminado",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paciente removido com sucesso"
+          },
+          "404": {
+            "description": "Paciente não encontrado"
+          }
+        }
+      }
+    },
+    "/users/{userId}/doctors": {
+      "get": {
+        "summary": "Retorna todos os médicos com quem um utilizador teve consultas",
+        "description": "Retorna uma lista de todos os médicos com quem um utilizador específico (paciente)\nteve pelo menos uma consulta agendada.\nEste endpoint demonstra a relação Muitos-para-Muitos entre Utilizadores e Médicos\natravés da tabela de Agendamentos.\nAcessível apenas ao utilizador especificado (se autenticado) ou a um administrador.\n",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "description": "O ID do utilizador (paciente) cujos médicos associados devem ser retornados",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de médicos associados ao utilizador encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "description": "O ID do médico"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "O nome do médico"
+                      },
+                      "specialty": {
+                        "type": "object",
+                        "description": "A especialidade do médico",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "description": "O ID da especialidade"
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "O nome da especialidade"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autenticado. O token de autenticação está ausente ou inválido."
+          },
+          "403": {
+            "description": "Acesso negado. O utilizador autenticado não tem permissão para aceder a esta lista de médicos."
+          },
+          "404": {
+            "description": "Utilizador não encontrado com o ID fornecido."
+          },
+          "500": {
+            "description": "Erro interno do servidor ao processar a requisição."
+          }
+        }
+      }
+    },
+    "/users/{userId}/specialties/{specialtyId}/appointments": {
+      "get": {
+        "summary": "Retorna consultas de um utilizador com médicos de uma especialidade específica",
+        "description": "Lista todas as consultas agendadas para um utilizador cujo ID é especificado no caminho,\ncom médicos que pertencem à especialidade cujo ID também é especificado.\nAcessível apenas ao utilizador especificado (se autenticado) ou a um administrador.\n",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "description": "O ID do utilizador (paciente) cujas consultas devem ser retornadas",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "specialtyId",
+            "required": true,
+            "description": "O ID da especialidade para filtrar os médicos associados às consultas",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de consultas encontrada para o utilizador e especialidade",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "description": "O ID da consulta"
+                      },
+                      "date": {
+                        "type": "string",
+                        "format": "date",
+                        "description": "A data da consulta"
+                      },
+                      "time": {
+                        "type": "string",
+                        "format": "time",
+                        "description": "A hora da consulta"
+                      },
+                      "notes": {
+                        "type": "string",
+                        "description": "Notas da consulta (opcional)",
+                        "nullable": true
+                      },
+                      "medico": {
+                        "type": "object",
+                        "description": "Os detalhes do médico associado à consulta",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "description": "O ID do médico"
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "O nome do médico"
+                          },
+                          "specialty": {
+                            "type": "object",
+                            "description": "A especialidade do médico",
+                            "properties": {
+                              "id": {
+                                "type": "integer",
+                                "description": "O ID da especialidade"
+                              },
+                              "name": {
+                                "type": "string",
+                                "description": "O nome da especialidade"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autenticado. O token de autenticação está ausente ou inválido."
+          },
+          "403": {
+            "description": "Acesso negado. O utilizador autenticado não tem permissão para aceder a estas consultas (não é o utilizador na URL nem admin)."
+          },
+          "404": {
+            "description": "Utilizador ou especialidade não encontrados com os IDs fornecidos."
+          },
+          "500": {
+            "description": "Erro interno do servidor ao processar a requisição."
+          }
+        }
+      }
+    },
+    "/users/{userId}/appointments": {
+      "get": {
+        "summary": "Retorna todas as consultas de um utilizador",
+        "description": "Lista todas as consultas agendadas para um utilizador cujo ID é especificado no caminho.\nAcessível apenas ao utilizador especificado (se autenticado) ou a um administrador.\n",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "description": "O ID do utilizador cujas consultas devem ser retornadas",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de consultas encontrada para o utilizador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "description": "O ID da consulta"
+                      },
+                      "date": {
+                        "type": "string",
+                        "format": "date",
+                        "description": "A data da consulta"
+                      },
+                      "time": {
+                        "type": "string",
+                        "format": "time",
+                        "description": "A hora da consulta"
+                      },
+                      "notes": {
+                        "type": "string",
+                        "description": "Notas ou descrição da consulta (opcional)",
+                        "nullable": true
+                      },
+                      "paciente": {
+                        "type": "object",
+                        "description": "Os detalhes do paciente (utilizador) associado a esta consulta",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "description": "O ID do paciente"
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "O nome do paciente"
+                          },
+                          "email": {
+                            "type": "string",
+                            "format": "email",
+                            "description": "O email do paciente"
+                          }
+                        }
+                      },
+                      "medico": {
+                        "type": "object",
+                        "description": "Os detalhes do médico associado a esta consulta",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "description": "O ID do médico"
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "O nome do médico"
+                          },
+                          "specialty": {
+                            "type": "object",
+                            "description": "A especialidade do médico",
+                            "properties": {
+                              "id": {
+                                "type": "integer",
+                                "description": "O ID da especialidade"
+                              },
+                              "name": {
+                                "type": "string",
+                                "description": "O nome da especialidade"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autenticado. O token de autenticação está ausente ou inválido."
+          },
+          "403": {
+            "description": "Acesso negado. O utilizador autenticado não tem permissão para aceder a estas consultas (não é o utilizador na URL nem admin)."
+          },
+          "404": {
+            "description": "Utilizador não encontrado com o ID fornecido."
+          },
+          "500": {
+            "description": "Erro interno do servidor ao processar a requisição."
+          }
+        }
+      }
+    },
+    "/doctors": {
+      "get": {
+        "summary": "Retorna uma lista de médicos",
+        "tags": [
+          "Doctors"
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de médicos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro ao buscar médicos"
+          }
+        }
+      },
+      "post": {
+        "summary": "Cria um novo médico",
+        "tags": [
+          "Doctors"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "O nome do médico"
+                  },
+                  "specialty_id": {
+                    "type": "integer",
+                    "description": "O ID da especialidade do médico"
+                  }
+                },
+                "required": [
+                  "name",
+                  "specialty_id"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Médico criado com sucesso"
+          },
+          "400": {
+            "description": "Dados inválidos ou ausentes"
+          }
+        }
+      }
+    },
+    "/doctors/{id}": {
+      "get": {
+        "summary": "Retorna um médico pelo ID",
+        "tags": [
+          "Doctors"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Médico encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Médico não encontrado"
+          }
+        }
+      },
+      "put": {
+        "summary": "Atualiza os dados de um médico",
+        "tags": [
+          "Doctors"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "specialty_id": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Médico atualizado com sucesso"
+          },
+          "400": {
+            "description": "Erro ao atualizar médico"
+          },
+          "404": {
+            "description": "Médico não encontrado"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Elimina um médico pelo ID",
+        "tags": [
+          "Doctors"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Médico removido com sucesso"
+          },
+          "404": {
+            "description": "Médico não encontradp"
+          }
+        }
+      }
+    },
+    "/doctors/{id}/appointments": {
+      "get": {
+        "summary": "Retorna todas as consultas e pacientes de um médico específico",
+        "description": "Lista todas as consultas agendadas com um médico cujo ID é especificado no caminho,\nincluindo os detalhes dos pacientes associados a cada consulta,\nbem como os detalhes do médico e a sua especialidade.\nEsta rota requer autenticação. A lógica de autorização (ex: apenas admin ou o próprio médico)\ndeve ser implementada no backend.\n",
+        "tags": [
+          "Doctors"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "O ID do médico cujas consultas e pacientes devem ser retornados",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de consultas com pacientes encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "consultaId": {
+                        "type": "integer",
+                        "description": "O ID da consulta"
+                      },
+                      "date": {
+                        "type": "string",
+                        "format": "date",
+                        "description": "A data da consulta"
+                      },
+                      "time": {
+                        "type": "string",
+                        "format": "time",
+                        "description": "A hora da consulta"
+                      },
+                      "notes": {
+                        "type": "string",
+                        "description": "Notas ou descrição da consulta (opcional)",
+                        "nullable": true
+                      },
+                      "paciente": {
+                        "type": "object",
+                        "description": "Os detalhes do paciente (utilizador) associado a esta consulta",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "description": "O ID do paciente"
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "O nome do paciente"
+                          },
+                          "email": {
+                            "type": "string",
+                            "format": "email",
+                            "description": "O email do paciente"
+                          }
+                        }
+                      },
+                      "medico": {
+                        "type": "object",
+                        "description": "Os detalhes do médico associado a esta consulta",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "description": "O ID do médico"
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "O nome do médico"
+                          },
+                          "specialty": {
+                            "type": "object",
+                            "description": "A especialidade do médico",
+                            "properties": {
+                              "id": {
+                                "type": "integer",
+                                "description": "O ID da especialidade"
+                              },
+                              "name": {
+                                "type": "string",
+                                "description": "O nome da especialidade"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autenticado. O token de autenticação está ausente ou inválido."
+          },
+          "403": {
+            "description": "Acesso negado. O utilizador autenticado não tem permissão para aceder a estas consultas (ex: não é admin, nem o médico em questão)."
+          },
+          "404": {
+            "description": "Médico não encontrado com o ID fornecido."
+          },
+          "500": {
+            "description": "Erro interno do servidor ao processar a requisição."
+          }
+        }
+      }
+    },
+    "/appointments": {
+      "get": {
+        "summary": "Retorna uma lista de consultas",
+        "tags": [
+          "Appointments"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de consultas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "description": "O ID da consulta"
+                      },
+                      "data": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "A data e hora da consulta"
+                      },
+                      "descricao": {
+                        "type": "string",
+                        "description": "Descrição da consulta (opcional)"
+                      },
+                      "specialty": {
+                        "type": "object",
+                        "description": "A especialidade da consulta",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "description": "O ID da especialidade"
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "O nome da especialidade"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      },
+      "post": {
+        "summary": "Cria uma nova consulta",
+        "tags": [
+          "Appointments"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "data",
+                  "pacienteId",
+                  "medicoId"
+                ],
+                "properties": {
+                  "data": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "A data e hora da consulta"
+                  },
+                  "descricao": {
+                    "type": "string",
+                    "description": "Descrição da consulta (opcional)"
+                  },
+                  "pacienteId": {
+                    "type": "integer",
+                    "description": "O ID do paciente relacionado"
+                  },
+                  "medicoId": {
+                    "type": "integer",
+                    "description": "O ID do médico relacionado"
+                  },
+                  "especialidadeId": {
+                    "type": "integer",
+                    "description": "O ID da especialidade desejada para a consulta"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Consulta criada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "data": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "descricao": {
+                      "type": "string"
+                    },
+                    "pacienteId": {
+                      "type": "integer"
+                    },
+                    "medicoId": {
+                      "type": "integer"
+                    },
+                    "especialidadeId": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou ausentes"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      }
+    },
+    "/appointments/{id}": {
+      "get": {
+        "summary": "Retorna uma consulta pelo ID",
+        "tags": [
+          "Appointments"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID da consulta a ser retornada",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Consulta encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "data": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "descricao": {
+                      "type": "string"
+                    },
+                    "pacienteId": {
+                      "type": "integer"
+                    },
+                    "medicoId": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Consulta não encontrada"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      },
+      "put": {
+        "summary": "Atualiza os dados de uma consulta",
+        "tags": [
+          "Appointments"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID da consulta a ser atualizada",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "data",
+                  "pacienteId",
+                  "medicoId"
+                ],
+                "properties": {
+                  "data": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Nova data e hora da consulta"
+                  },
+                  "descricao": {
+                    "type": "string",
+                    "description": "Nova descrição da consulta (opcional)"
+                  },
+                  "pacienteId": {
+                    "type": "integer",
+                    "description": "Novo ID do paciente"
+                  },
+                  "medicoId": {
+                    "type": "integer",
+                    "description": "Novo ID do médico"
+                  },
+                  "especialidadeId": {
+                    "type": "integer",
+                    "description": "Novo ID da especialidade"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Consulta atualizada com sucesso"
+          },
+          "400": {
+            "description": "Dados inválidos ou ausentes"
+          },
+          "404": {
+            "description": "Consulta não encontrada"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Elimina uma consulta pelo ID",
+        "tags": [
+          "Appointments"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID da consulta a ser eliminada",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Consulta removida com sucesso"
+          },
+          "404": {
+            "description": "Consulta não encontrada"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      }
+    },
+    "/specialties": {
+      "get": {
+        "summary": "Retorna uma lista de todas as especialidades",
+        "description": "Acessível a qualquer utilizador autenticado.",
+        "tags": [
+          "Specialties"
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de especialidades retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "description": "O ID da especialidade"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "O nome da especialidade"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      },
+      "post": {
+        "summary": "Cria uma nova especialidade",
+        "description": "Apenas acessível por utilizadores com a role 'admin'.",
+        "tags": [
+          "Specialties"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "O nome da nova especialidade"
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Especialidade criada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "description": "O ID da nova especialidade criada"
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "O nome da nova especialidade criada"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou ausentes (ex: nome faltando ou já existe)"
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "403": {
+            "description": "Acesso negado (utilizador não é admin)"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      }
+    },
+    "/specialties/{id}": {
+      "get": {
+        "summary": "Retorna uma especialidade pelo ID",
+        "description": "Acessível a qualquer utilizador autenticado.",
+        "tags": [
+          "Specialties"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "O ID da especialidade a ser retornada",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Especialidade encontrada e retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "description": "O ID da especialidade"
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "O nome da especialidade"
+                    },
+                    "doctors": {
+                      "type": "array",
+                      "description": "Lista de médicos associados a esta especialidade",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "description": "O ID do médico"
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "O nome do médico"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "404": {
+            "description": "Especialidade não encontrada"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      },
+      "put": {
+        "summary": "Atualiza uma especialidade pelo ID",
+        "description": "Apenas acessível por utilizadores com a role 'admin'.",
+        "tags": [
+          "Specialties"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "O ID da especialidade a ser atualizada",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "O novo nome da especialidade"
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Especialidade atualizada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "description": "O ID da especialidade atualizada"
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "O nome atualizado da especialidade"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou ausentes (ex: nome faltando ou já existe)"
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "403": {
+            "description": "Acesso negado (utilizador não é admin)"
+          },
+          "404": {
+            "description": "Especialidade não encontrada"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Elimina uma especialidade pelo ID",
+        "description": "Apenas acessível por utilizadores com a role 'admin'.",
+        "tags": [
+          "Specialties"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "O ID da especialidade a ser eliminada",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Especialidade removida com sucesso (No Content)"
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "403": {
+            "description": "Acesso negado (utilizador não é admin)"
+          },
+          "404": {
+            "description": "Especialidade não encontrada"
+          },
+          "500": {
+            "description": "Erro interno do servidor (ex: devido a restrições de chave estrangeira se houver médicos associados e a regra ON DELETE não for CASCADE/SET NULL)"
+          }
+        }
+      }
+    }
+  }
+}

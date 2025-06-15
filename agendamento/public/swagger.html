@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Swagger UI</title>
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist/swagger-ui.css" />
+  <style>
+    #auth-buttons {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 1000;
+      background-color: rgb(19, 133, 226);
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    #auth-buttons button {
+      margin-left: 10px;
+      padding: 5px 10px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .swagger-ui .topbar {
+      margin-top: 80px;
+      box-sizing: border-box;
+    }
+
+    #login-info {
+      color: #fff;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="auth-buttons">
+    <span id="login-info"></span>
+    <button onclick="loginWithGoogle()">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"
+        style="height:18px;vertical-align:middle;margin-right:6px;">
+      Login com Google
+    </button>
+    <button onclick="logout()">🚪 Logout</button>
+  </div>
+
+  <div id="swagger-ui"></div>
+
+  <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-bundle.js"></script>
+  <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-standalone-preset.js"></script>
+  <script>
+    // Captura token JWT e user via query e guarda localmente
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    const user = params.get('user'); // <-- novo parâmetro
+
+    if (token) {
+      localStorage.setItem('jwt-token', token);
+      if (user) {
+        localStorage.setItem('user-name', decodeURIComponent(user));
+      }
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    // Mostra info do utilizador se estiver autenticado
+    function showLoginInfo() {
+      const userName = localStorage.getItem('user-name');
+       console.log('user-name:', userName); // DEBUG
+      const loginInfo = document.getElementById('login-info');
+      if (userName) {
+        loginInfo.textContent = `LOGIN efectuado com utilizador ${userName}`;
+      } else {
+        loginInfo.textContent = '';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', showLoginInfo);
+
+
+    // Inicializar Swagger UI com interceptor para enviar o JWT
+    const ui = SwaggerUIBundle({
+      url: "/swagger.json",
+      dom_id: '#swagger-ui',
+      presets: [
+        SwaggerUIBundle.presets.apis,
+        SwaggerUIStandalonePreset
+      ],
+      layout: "StandaloneLayout",
+      requestInterceptor: (req) => {
+        const jwt = localStorage.getItem('jwt-token');
+        if (jwt) {
+          req.headers['Authorization'] = `Bearer ${jwt}`;
+        }
+        return req;
+      }
+    });
+
+    // Funções de autenticação
+    function loginWithGoogle() {
+      window.location.href = "/auth/google";
+    }
+
+    function logout() {
+      localStorage.removeItem('jwt-token');
+      localStorage.removeItem('user-name');
+      window.location.href = "/swagger.html";
+    }
+  </script>
+</body>
+
+</html>

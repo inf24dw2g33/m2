@@ -1,0 +1,451 @@
+tags:
+  - name: Users
+    description: Operações relacionadas com pacientes
+
+paths:
+  /users:
+    get:
+      summary: Retorna uma lista de pacientes
+      tags:
+        - Users
+      security:
+        - bearerAuth: [] # Requer autenticação
+
+      responses:
+        200:
+          description: Lista de pacientes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      description: O ID do paciente
+                    nome:
+                      type: string
+                      description: O nome do paciente
+        500:
+          description: Erro ao buscar pacientes
+    post:
+      summary: Cria um novo paciente
+      tags:
+        - Users
+      security:
+        - bearerAuth: [] # Requer autenticação
+
+      requestBody: # Define o corpo do pedido esperado
+        required: true # Indica que o corpo do pedido é obrigatório
+        content:
+          application/json: # O tipo de conteúdo esperado é JSON
+            schema: # Define a estrutura do objeto JSON esperado
+              type: object # O corpo do pedido é um objeto JSON
+              properties: # Define as propriedades (campos) do objeto
+                name:
+                  type: string
+                  description: O nome completo do utilizador.
+                  example: "João Silva" # Exemplo de valor para documentação
+                email:
+                  type: string
+                  format: email # Indica que deve ser um formato de email
+                  description: O endereço de email único do utilizador.
+                  example: "joao.silva@example.com"
+                google_id:
+                  type: string
+                  description: O identificador único do utilizador fornecido pelo Google (após autenticação OAuth2).
+                  example: "118005194401585621327" # Exemplo de um Google ID
+
+              required: # Lista os campos que são obrigatórios no corpo do pedido
+                - name
+                - email
+                - google_id
+
+      responses:
+        201:
+          description: Utilizador criado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object # A resposta é um objeto JSON
+                properties:
+                  id:
+                    type: integer
+                    description: O ID único do utilizador criado.
+                  name:
+                    type: string
+                    description: O nome do utilizador.
+                  email:
+                    type: string
+                    format: email
+                    description: O email do utilizador.
+                  google_id:
+                    type: string
+                    description: O Google ID do utilizador.
+                  role:
+                    type: string
+                    description: O papel do utilizador no sistema (ex: 'user', 'admin').
+                    enum: ['user', 'admin'] # Define os valores possíveis
+                example: # Exemplo da resposta esperada
+                  id: 1
+                  name: "João Silva"
+                  email: "joao.silva@example.com"
+                  google_id: "118005194401585621327"
+                  role: "user"
+
+        400:
+          description: Pedido inválido (ex: campos obrigatórios faltando, email ou Google ID já existem)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Mensagem de erro detalhada.
+                example:
+                  error: "Campos obrigatórios faltando: name, email, google_id."
+
+        500:
+          description: Erro interno do servidor ao criar o utilizador.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Mensagem de erro detalhada.
+                example:
+                  error: "Erro interno do servidor ao criar utilizador."
+
+  /users/{id}:
+    get:
+      summary: Retorna um paciente pelo ID
+      tags:
+        - Users
+      security:
+        - bearerAuth: [] # Requer autenticação
+
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID do paciente a ser retornado
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Paciente encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  nome:
+                    type: string
+        404:
+          description: Paciente não encontrado
+    put:
+      summary: Atualiza os dados de um paciente
+      tags:
+        - Users
+      security:
+        - bearerAuth: [] # Requer autenticação
+
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID do paciente a ser atualizado
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: O nome do paciente
+      responses:
+        200:
+          description: Paciente atualizado com sucesso
+        400:
+          description: Erro ao atualizar paciente
+        404:
+          description: Paciente não encontrado
+    
+    
+    delete:
+      summary: Elimina um paciente pelo ID
+      tags:
+        - Users
+      security:
+        - bearerAuth: [] # Requer autenticação
+
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID do paciente a ser eliminado
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Paciente removido com sucesso
+        404:
+          description: Paciente não encontrado
+
+  /users/{userId}/doctors:
+    get:
+      summary: Retorna todos os médicos com quem um utilizador teve consultas
+      description: |
+        Retorna uma lista de todos os médicos com quem um utilizador específico (paciente)
+        teve pelo menos uma consulta agendada.
+        Este endpoint demonstra a relação Muitos-para-Muitos entre Utilizadores e Médicos
+        através da tabela de Agendamentos.
+        Acessível apenas ao utilizador especificado (se autenticado) ou a um administrador.
+      tags:
+        - Users
+
+      security:
+        - bearerAuth: [] # Requer autenticação
+
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          description: O ID do utilizador (paciente) cujos médicos associados devem ser retornados
+          schema:
+            type: integer # Assumimos ID inteiro
+
+      responses:
+        200:
+          description: Lista de médicos associados ao utilizador encontrada
+          content:
+            application/json:
+              schema:
+                type: array # A resposta é um array de médicos
+                items: # Define o esquema para cada item (cada médico)
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      description: O ID do médico
+                    name:
+                      type: string
+                      description: O nome do médico
+                    # Inclui a especialidade do médico aninhada, conforme o alias 'specialty'
+                    specialty: # A query inclui a especialidade dentro do médico
+                      type: object
+                      description: A especialidade do médico
+                      properties:
+                        id:
+                          type: integer
+                          description: O ID da especialidade
+                        name:
+                          type: string
+                          description: O nome da especialidade
+
+        401:
+          description: Não autenticado. O token de autenticação está ausente ou inválido.
+
+        403:
+          description: Acesso negado. O utilizador autenticado não tem permissão para aceder a esta lista de médicos.
+
+        404:
+          description: Utilizador não encontrado com o ID fornecido.
+
+        500:
+          description: Erro interno do servidor ao processar a requisição.
+
+
+  /users/{userId}/specialties/{specialtyId}/appointments:
+    get:
+      summary: Retorna consultas de um utilizador com médicos de uma especialidade específica
+      description: |
+        Lista todas as consultas agendadas para um utilizador cujo ID é especificado no caminho,
+        com médicos que pertencem à especialidade cujo ID também é especificado.
+        Acessível apenas ao utilizador especificado (se autenticado) ou a um administrador.
+      tags:
+        - Users
+
+      security:
+        - bearerAuth: [] # Requer autenticação
+
+      parameters:
+        - in: path
+          name: userId # Primeiro parâmetro de caminho
+          required: true
+          description: O ID do utilizador (paciente) cujas consultas devem ser retornadas
+          schema:
+            type: integer # Assumimos ID inteiro
+
+        - in: path
+          name: specialtyId # Segundo parâmetro de caminho
+          required: true
+          description: O ID da especialidade para filtrar os médicos associados às consultas
+          schema:
+            type: integer # Assumimos ID inteiro
+      responses:
+        200:
+          description: Lista de consultas encontrada para o utilizador e especialidade
+          content:
+            application/json:
+              schema:
+                type: array # A resposta é um array
+                items: # Define o esquema para um item (uma consulta com médico e especialidade)
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      description: O ID da consulta
+                    date:
+                      type: string
+                      format: date # YYYY-MM-DD
+                      description: A data da consulta
+                    time:
+                      type: string
+                      format: time # HH:MM:SS ou similar
+                      description: A hora da consulta
+                    notes:
+                      type: string
+                      description: Notas da consulta (opcional)
+                      nullable: true # Indica que pode ser nulo
+                    # Inclui o médico aninhado, conforme o alias 'medico'
+                    medico:
+                      type: object
+                      description: Os detalhes do médico associado à consulta
+                      properties:
+                        id:
+                          type: integer
+                          description: O ID do médico
+                        name:
+                          type: string
+                          description: O nome do médico
+                        # Inclui a especialidade do médico aninhada, conforme o alias 'specialty'
+                        specialty:
+                          type: object
+                          description: A especialidade do médico
+                          properties:
+                            id:
+                              type: integer
+                              description: O ID da especialidade
+                            name:
+                              type: string
+                              description: O nome da especialidade
+
+        401:
+          description: Não autenticado. O token de autenticação está ausente ou inválido.
+
+        403:
+          description: Acesso negado. O utilizador autenticado não tem permissão para aceder a estas consultas (não é o utilizador na URL nem admin).
+
+        404:  
+          description: Utilizador ou especialidade não encontrados com os IDs fornecidos.
+
+        500:
+          description: Erro interno do servidor ao processar a requisição.
+
+  /users/{userId}/appointments:
+    get:
+      summary: Retorna todas as consultas de um utilizador
+      description: |
+        Lista todas as consultas agendadas para um utilizador cujo ID é especificado no caminho.
+        Acessível apenas ao utilizador especificado (se autenticado) ou a um administrador.
+     
+      tags:
+        - Users
+    
+      security:
+        - bearerAuth: [] # Requer autenticação (Bearer Token)
+
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          description: O ID do utilizador cujas consultas devem ser retornadas
+          schema:
+            type: integer # Assumimos ID inteiro
+
+      responses:
+        200:
+          description: Lista de consultas encontrada para o utilizador
+          content:
+            application/json:
+              schema:
+                type: array # A resposta é um array de consultas
+                items: # Define o esquema para cada item (cada consulta)
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      description: O ID da consulta
+                    date:
+                      type: string
+                      format: date # Formato apenas da data (YYYY-MM-DD)
+                      description: A data da consulta
+                    time:
+                      type: string
+                      format: time # Formato apenas da hora (HH:MM:SS ou similar)
+                      description: A hora da consulta
+                    notes:
+                      type: string
+                      description: Notas ou descrição da consulta (opcional)
+                      nullable: true # Indica que este campo pode ser nulo
+
+                    paciente:
+                      type: object
+                      description: Os detalhes do paciente (utilizador) associado a esta consulta
+                      properties: # Define os campos que serão incluídos para o paciente
+                        id:
+                          type: integer
+                          description: O ID do paciente
+                        name:
+                          type: string
+                          description: O nome do paciente
+                        email:
+                          type: string
+                          format: email # Formato específico para endereços de email
+                          description: O email do paciente
+                        # Inclua aqui quaisquer outros campos do User que sejam retornados na query
+
+                    medico:
+                      type: object
+                      description: Os detalhes do médico associado a esta consulta
+                      properties:
+                        id:
+                          type: integer
+                          description: O ID do médico
+                        name:
+                          type: string
+                          description: O nome do médico
+                        # Inclui a especialidade do médico aninhada, usando o alias 'specialty'
+                        specialty:
+                          type: object
+                          description: A especialidade do médico
+                          properties:
+                            id:
+                              type: integer
+                              description: O ID da especialidade
+                            name:
+                              type: string
+                              description: O nome da especialidade
+
+        401:
+          description: Não autenticado. O token de autenticação está ausente ou inválido.
+
+        403:
+          description: Acesso negado. O utilizador autenticado não tem permissão para aceder a estas consultas (não é o utilizador na URL nem admin).
+
+        404:
+          description: Utilizador não encontrado com o ID fornecido.
+
+        500:
+          description: Erro interno do servidor ao processar a requisição.

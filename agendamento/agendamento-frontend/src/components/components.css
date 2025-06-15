@@ -1,0 +1,517 @@
+/* -- Contêineres Principais -- */
+.medicos-container,
+.consultas-container,
+.users-container,
+.especialidades-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Alinha ao topo para que o conteúdo não fique no centro vertical */
+    min-height: 100vh; /* Garante que o contêiner ocupa a altura total da viewport */
+    /*background-color: #f0f2f5; /* Um cinza claro suave para o fundo */
+    padding: 20px; /* Espaçamento interno */
+    box-sizing: border-box; /* Garante que padding não adicione largura/altura extra */
+}
+
+/* -- Cartões/Tabelas (Contêineres de Conteúdo) -- */
+.medicos-table,
+.consultas-table,
+.users-table,
+.especialidades-card {
+    background-color: #fff; /* Fundo branco para os cartões */
+    border-radius: 8px; /* Cantos arredondados */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sombra suave para profundidade */
+    padding: 30px; /* Espaçamento interno maior */
+    width: 100%;
+    /*max-width: 1200px; /* Largura máxima para tabelas grandes */
+    max-width: 90%;
+    margin: 20px; /* Margem externa */
+}
+
+/* -- Títulos -- */
+h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 25px;
+    font-size: 2em; /* Tamanho maior para títulos */
+    font-weight: 600; /* Um pouco mais encorpado */
+}
+
+/* -- Formulários (Adicionar/Editar) -- */
+.medico-form,
+.consulta-form,
+.user-form,
+.especialidade-form {
+    display: flex;
+    flex-wrap: wrap; /* Permite que os itens quebrem para a próxima linha em telas menores */
+    gap: 15px; /* Espaçamento entre os campos do formulário */
+    margin-bottom: 30px;
+    padding: 20px;
+    background-color: #f9f9f9; /* Fundo levemente diferente para o formulário */
+    border-radius: 6px;
+    border: 1px solid #eee;
+    align-items: center; /* Alinha itens verticalmente */
+}
+
+/* -- Inputs e Selects -- */
+.medico-input,
+.consulta-input,
+.user-input,
+.especialidade-input {
+    flex: 1; /* Permite que os inputs se expandam */
+    min-width: 180px; /* Largura mínima para evitar que fiquem muito pequenos */
+    padding: 12px 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    color: #333;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.medico-input:focus,
+.consulta-input:focus,
+.user-input:focus,
+.especialidade-input:focus {
+    border-color: #007bff; /* Cor azul ao focar */
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25); /* Sombra suave ao focar */
+    outline: none; /* Remove o contorno padrão do navegador */
+}
+
+/* -- Botões -- */
+.medico-btn,
+.consulta-btn,
+.user-btn,
+.especialidade-btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    white-space: nowrap; /* Evita que o texto do botão quebre */
+}
+
+/* Cores dos botões */
+.medico-btn.add,
+.consulta-btn.add,
+.user-btn.add,
+.especialidade-btn.add {
+    background-color: #28a745; /* Verde para adicionar */
+    color: white;
+}
+.medico-btn.add:hover,
+.consulta-btn.add:hover,
+.user-btn.add:hover,
+.especialidade-btn.add:hover {
+    background-color: #218838;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.medico-btn.edit,
+.consulta-btn.edit,
+.user-btn.edit,
+.especialidade-btn.edit {
+    background-color: #007bff; /* Azul para editar */
+    color: white;
+}
+.medico-btn.edit:hover,
+.consulta-btn.edit:hover,
+.user-btn.edit:hover,
+.especialidade-btn.edit:hover {
+    background-color: #0056b3;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.medico-btn.delete,
+.consulta-btn.delete,
+.user-btn.delete,
+.especialidade-btn.delete {
+    background-color: #dc3545; /* Vermelho para eliminar */
+    color: white;
+}
+.medico-btn.delete:hover,
+.consulta-btn.delete:hover,
+.user-btn.delete:hover,
+.especialidade-btn.delete:hover {
+    background-color: #c82333;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.medico-btn.save,
+.consulta-btn.save,
+.user-btn.save,
+.especialidade-btn.save {
+    background-color: #17a2b8; /* Azul claro para salvar */
+    color: white;
+}
+.medico-btn.save:hover,
+.consulta-btn.save:hover,
+.user-btn.save:hover,
+.especialidade-btn.save:hover {
+    background-color: #138496;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.medico-btn.cancel,
+.consulta-btn.cancel,
+.user-btn.cancel,
+.especialidade-btn.cancel {
+    background-color: #6c757d; /* Cinza para cancelar */
+    color: white;
+}
+.medico-btn.cancel:hover,
+.consulta-btn.cancel:hover,
+.user-btn.cancel:hover,
+.especialidade-btn.cancel:hover {
+    background-color: #5a6268;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* -- Botão "Consultas" em MedicosList -- */
+.medico-btn.consultas {
+    background-color: #ffc107; /* Amarelo para "Consultas" */
+    color: #333;
+    font-weight: bold;
+}
+.medico-btn.consultas:hover {
+    background-color: #e0a800;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+
+/* -- Tabelas -- */
+table {
+    width: 100%;
+    border-collapse: collapse; /* Remove espaçamento entre células */
+    margin-top: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    overflow: hidden; /* Garante que cantos arredondados sejam aplicados corretamente */
+}
+
+thead th {
+    background-color: #007bff; /* Azul para o cabeçalho da tabela */
+    color: white;
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.9em;
+}
+
+tbody tr {
+    border-bottom: 1px solid #eee; /* Linhas divisórias suaves */
+    transition: background-color 0.2s ease;
+}
+
+tbody tr:last-child {
+    border-bottom: none; /* Remove a linha de baixo da última linha */
+}
+
+tbody tr:hover {
+    background-color: #f5f5f5; /* Efeito de hover nas linhas */
+}
+
+tbody td {
+    padding: 15px;
+    vertical-align: middle;
+    color: #555;
+}
+
+tbody td button {
+    margin-right: 8px; /* Espaçamento entre botões na tabela */
+}
+tbody td button:last-child {
+    margin-right: 0;
+}
+
+/* Inputs dentro da tabela para edição */
+tbody td .medico-input,
+tbody td .consulta-input,
+tbody td .user-input {
+    width: calc(100% - 10px); /* Ajuste para não transbordar */
+    padding: 8px 10px;
+    font-size: 0.95rem;
+    margin-bottom: 5px; /* Espaçamento entre inputs e botões de editar/salvar */
+}
+/* Especialidades list - específicos */
+.especialidades-list {
+    list-style: none;
+    padding: 0;
+}
+
+.especialidade-link-item {
+    border-bottom: 1px solid #eee;
+    padding: 15px 0;
+}
+
+.especialidade-link-item:last-child {
+    border-bottom: none;
+}
+
+.especialidade-link {
+    display: block; /* Para o botão ocupar toda a largura e ser clicável */
+}
+
+.especialidade-opcoes {
+    border-left: 3px solid #007bff;
+    padding-left: 15px;
+    margin-top: 10px;
+}
+
+.especialidade-opcoes ul {
+    list-style: none; /* Remove os marcadores (pontos) */
+    padding-left: 0;   /* Remove o padding padrão da lista */
+    margin-top: 10px;
+    display: flex;     /* Usa flexbox para que os itens fiquem na mesma linha */
+    flex-wrap: wrap;   /* Permite que os itens quebrem para a próxima linha se não houver espaço */
+    gap: 10px;         /* Adiciona espaçamento entre os nomes dos médicos */
+}
+
+.especialidade-opcoes ul li {
+    display: inline-block; /* Faz com que os itens se comportem como blocos em linha */
+    background-color: #e0f7fa; /* Um fundo suave para cada nome de médico */
+    padding: 5px 10px;
+    border-radius: 4px;
+    color: #00796b; /* Cor do texto */
+    font-size: 0.9em;
+    white-space: nowrap; /* Evita que o nome do médico quebre em várias linhas */
+    border: 1px solid #b2ebf2; /* Uma borda suave */
+}
+
+.sem-medicos {
+    color: #888;
+    font-style: italic;
+    margin-top: 5px;
+}
+
+/* -- Mensagens de Erro/Carregamento -- */
+.medicos-table,
+.consultas-table,
+.users-table,
+.especialidades-card {
+    text-align: center; /* Centraliza "A carregar..." e "Erro..." */
+    font-size: 1.2em;
+    color: #666;
+    padding: 50px;
+}
+
+/* -- Responsividade básica -- */
+@media (max-width: 768px) {
+    .medicos-table,
+    .consultas-table,
+    .users-table,
+    .especialidades-card {
+        padding: 20px;
+        margin: 10px;
+    }
+
+    .medico-form,
+    .consulta-form,
+    .user-form,
+    .especialidade-form {
+        flex-direction: column; /* Empilha os campos em telas pequenas */
+        align-items: stretch;
+    }
+
+    .medico-input,
+    .consulta-input,
+    .user-input,
+    .especialidade-input,
+    .medico-btn,
+    .consulta-btn,
+    .user-btn,
+    .especialidade-btn {
+        width: 100%;
+        min-width: unset; /* Remove o min-width para preencher 100% */
+    }
+
+    table, thead, tbody, th, td, tr {
+        display: block; /* Faz a tabela parecer uma lista de cartões */
+    }
+
+    thead tr {
+        position: absolute;
+        top: -9999px; /* Esconde o cabeçalho da tabela */
+        left: -9999px;
+    }
+
+    tbody tr {
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    tbody td {
+        border: none;
+        position: relative;
+        padding-left: 50%; /* Espaço para o "label" */
+        text-align: right;
+        padding-top: 8px;
+        padding-bottom: 8px;
+    }
+
+    tbody td:before {
+        content: attr(data-label); /* Usa o atributo data-label como pseudo-elemento */
+        position: absolute;
+        left: 6px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: bold;
+        color: #333;
+    }
+}
+
+/* Estilo para a linha do utilizador que é clicável */
+.user-list-item-header {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.user-list-item-header:hover {
+    background-color: #f0f0f0; /* Fundo suave ao passar o mouse */
+}
+
+/* Estilo para a área expandida com os detalhes do utilizador */
+.user-details-expanded {
+    background-color: #f9f9f9; /* Fundo mais claro para o conteúdo expandido */
+    padding: 20px;
+    border-radius: 0 0 8px 8px; /* Cantos arredondados apenas na parte inferior */
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05); /* Sombra interna suave */
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Espaçamento entre seções */
+}
+
+/* Estilos para o formulário de edição dentro da área expandida */
+.user-edit-form {
+    display: flex;
+    flex-wrap: wrap; /* Permite que os campos quebrem a linha */
+    gap: 15px; /* Espaçamento entre os campos do formulário */
+    align-items: center;
+    background-color: #e6f7ff; /* Um fundo diferente para o formulário de edição */
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid #91d5ff;
+}
+
+.user-edit-form label {
+    font-weight: bold;
+    min-width: 60px; /* Para alinhar labels */
+}
+
+.user-edit-form .user-input {
+    flex: 1; /* Faz os inputs ocuparem o espaço disponível */
+    min-width: 180px; /* Largura mínima para inputs */
+    padding: 10px;
+}
+
+/* Contêiner geral para as ações e listas de informação */
+.user-actions-details {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Espaçamento maior entre as principais seções */
+}
+
+/* Linha dos botões de ação (Editar, Eliminar) */
+.user-actions-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px; /* Espaçamento abaixo dos botões de ação */
+}
+
+/* Contêiner para as listas de informações (Médicos, Consultas, etc.) */
+.user-info-lists {
+    display: grid; /* Usar grid para melhor organização das sub-seções */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Colunas responsivas */
+    gap: 20px;
+}
+
+/* Estilo para cada sub-seção (Médicos, Todas Consultas, Consultas por Especialidade) */
+.user-sub-section {
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #eee;
+}
+
+.user-sub-section h4 {
+    margin-top: 0;
+    color: #333;
+    font-size: 1.1em;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+}
+
+.doctors-list-inline {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px; /* Espaçamento entre os nomes dos médicos */
+}
+
+.doctors-list-inline li {
+    background-color: #e0f7fa;
+    color: #00796b;
+    padding: 4px 10px;
+    border-radius: 20px; /* Formato de "pill" */
+    font-size: 0.85em;
+    white-space: nowrap;
+    border: 1px solid #b2ebf2;
+}
+
+/* Estilo para listas de consultas com rolagem */
+.appointments-list-scroll {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 200px; /* Altura máxima antes de ativar a rolagem */
+    overflow-y: auto; /* Ativa a rolagem vertical */
+    border: 1px solid #eee;
+    border-radius: 4px;
+    background-color: #fcfcfc;
+    padding-right: 5px; /* Espaço para a barra de rolagem */
+}
+
+.appointments-list-scroll li {
+    padding: 8px 10px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.9em;
+    color: #555;
+}
+
+.appointments-list-scroll li:last-child {
+    border-bottom: none;
+}
+
+/* Estilo para o botão "Ver todas as Consultas na página dedicada" */
+.user-btn.view-all-consultas {
+    background-color: #007bff; /* Azul para um botão de navegação */
+    color: white;
+    margin-top: 10px; /* Espaçamento acima do botão */
+    width: fit-content; /* Ajusta a largura ao conteúdo */
+    align-self: flex-start; /* Alinha à esquerda na coluna */
+}
+
+.user-btn.view-all-consultas:hover {
+    background-color: #0056b3;
+}
+
+/* Ajustes para o select de especialidade dentro da área expandida */
+.user-details-expanded .user-input {
+    margin-bottom: 10px; /* Espaçamento abaixo do select */
+}

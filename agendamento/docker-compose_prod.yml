@@ -1,0 +1,60 @@
+
+services:
+  clinica_app:
+    container_name: clinica_app
+    image: agendamento_app:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: 12345678
+      DB_NAME: Scheduler
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - scheduler-network
+
+
+  clinica_web:
+    image: clinica_web:latest
+    container_name: clinica_web
+    build:
+      context: ./agendamento-frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"              
+    networks:
+      - scheduler-network
+
+
+  db:
+    container_name: scheduler_db
+    image: mysql:8.0
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: 12345678
+      MYSQL_DATABASE: Scheduler
+      LANG : C.UTF-8
+      MYSQL_CHARSET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_general_ci
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
+    #volumes:
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 25s
+      timeout: 5s
+      retries: 5
+      start_period: 150s
+    networks:
+      - scheduler-network
+
+networks:
+  scheduler-network:
+    driver: bridge
