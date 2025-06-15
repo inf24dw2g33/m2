@@ -33,7 +33,7 @@ Na pasta `/postmanCollection` encontra-se a **co[leção `.json`** com todos os 
 
 | Funcionalidade | Imagem |
 | --- | ----------- |
-| Login |  ![Login](/galeria/login.png) |
+| Login |  ![Login](/galeria/login1.png) |
 | Users |  ![Users](/galeria/users.png) |
 | Doctors |  ![Doctors](/galeria/doctors.png) |
 | Appointments |  ![Appointments](/galeria/appointments.png) |
