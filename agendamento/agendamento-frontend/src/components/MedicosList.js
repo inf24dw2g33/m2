@@ -77,7 +77,7 @@ function MedicosList({ user, token, showMessage }) { // Certifique-se de passar 
                     dataDisplay,
                     pacienteName: c.paciente?.name || 'Paciente Desconhecido',
                     medicoName: c.medico?.name || 'Médico Desconhecido', // Já está no contexto, mas bom ter
-                    specialtyName: c.medico?.c.specialty?.name || 'Especialidade Desconhecida'
+                    specialtyName: c.medico?.specialty?.name || 'Especialidade Desconhecida'
                 };
             });
             setMedicoConsultas(formattedConsultas);
@@ -238,7 +238,7 @@ function MedicosList({ user, token, showMessage }) { // Certifique-se de passar 
                                                     <option key={s.id} value={s.id}>{s.name}</option>
                                                 ))}
                                             </select>
-                                        ) : (m.Specialty ? m.Specialty.name : 'N/A')} {/* Acessa a especialidade associada */}
+                                        ) : (m.specialty ? m.specialty.name : 'N/A')} {/* Acessa a especialidade associada */}
                                     </td>
                                     <td>
                                         {editMedicoId === m.id ? (

@@ -11,18 +11,83 @@
     box-sizing: border-box; /* Garante que padding não adicione largura/altura extra */
 }
 
-/* -- Cartões/Tabelas (Contêineres de Conteúdo) -- */
-.medicos-table,
-.consultas-table,
-.users-table,
-.especialidades-card { /* <--- ESSA É A CLASSE DO SEU CARD BRANCO */
-    background-color: #fff; /* Fundo branco para os cartões */
-    border-radius: 8px; /* Cantos arredondados */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sombra suave para profundidade */
-    padding: 30px; /* Espaçamento interno maior */
+/* -- Contêineres de Listagem (para envolver o formulário e a tabela) -- */
+/* Esta é a classe principal que engloba tudo em cada lista (UsersList, MedicosList, ConsultasList) */
+.list-container {
+    display: flex;
+    flex-direction: column; /* Organiza os itens verticalmente */
+    justify-content: flex-start; /* Alinha ao topo */
+    align-items: center; /* Centraliza horizontalmente */
+    min-height: 100vh; /* Ocupa a altura total da viewport */
+    padding: 20px 100px; /* Padding geral */
+    box-sizing: border-box;
+    width: 100%; /* Garante que o contêiner ocupe a largura total */
+}
+
+/* -- Formulário de Adição (dentro da caixa branca) -- */
+/* Aplica-se ao "Adicionar Novo Utilizador/Médico/Consulta" */
+.form-container {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 30px;
     width: 100%;
-    max-width: 1500px; 
-    margin: 20px auto; 
+    max-width: 1500px; /* Max-width para o formulário de adicionar */
+    margin-bottom: 30px; /* Espaço abaixo do formulário */
+    box-sizing: border-box; /* Adicionado para consistência */
+}
+
+.form-container .form-section-title {
+    text-align: center;
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.5em;
+}
+
+.form-container .form-info-text {
+    text-align: center;
+    color: #666;
+    margin-bottom: 25px;
+    font-size: 0.95em;
+}
+
+.form-container .form-row {
+    display: flex;
+    flex-wrap: wrap; /* Permite quebrar em telas menores */
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.form-container .form-input {
+    flex: 1;
+    padding: 12px 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    box-sizing: border-box; /* Adicionado para consistência */
+}
+
+.form-container .action-button.add {
+    width: fit-content;
+    margin: 0 auto; /* Centraliza o botão */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    font-size: 1rem;
+}
+
+/* -- Contêiner para a Tabela -- */
+/* Envolve a tabela principal (UsersList, MedicosList, ConsultasList) */
+.card-container {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    width: 100%;
+    max-width: 1500px; /* Max-width para a tabela */
+    box-sizing: border-box; /* Adicionado para consistência */
 }
 
 /* -- Títulos -- */
@@ -34,235 +99,143 @@ h2 {
     font-weight: 600; /* Um pouco mais encorpado */
 }
 
-/* -- Formulários (Adicionar/Editar) -- */
-.medico-form,
-.consulta-form,
-.user-form,
-.especialidade-form {
-    display: flex;
-    flex-wrap: wrap; /* Permite que os itens quebrem para a próxima linha em telas menores */
-    gap: 15px; /* Espaçamento entre os campos do formulário */
-    margin-bottom: 30px;
-    padding: 20px;
-    background-color: #f9f9f9; /* Fundo levemente diferente para o formulário */
-    border-radius: 6px;
-    border: 1px solid #eee;
-    align-items: center; /* Alinha itens verticalmente */
-}
-
-/* Novo estilo para o formulário de edição de especialidades */
-.especialidade-edit-form {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px; /* Espaçamento menor para formulários dentro de detalhes */
-    align-items: center;
-    background-color: #e6f7ff; /* Fundo diferente para indicar modo de edição */
-    padding: 10px 15px;
-    border-radius: 5px;
-    border: 1px solid #91d5ff;
-    margin-top: 10px; /* Espaçamento acima do formulário de edição */
-}
-
-
-/* -- Inputs e Selects -- */
-.medico-input,
-.consulta-input,
-.user-input,
-.especialidade-input {
-    flex: 1; /* Permite que os inputs se expandam */
-    min-width: 180px; /* Largura mínima para evitar que fiquem muito pequenos */
+/* -- Inputs e Selects (Genéricos) -- */
+.form-input { /* Usar form-input como classe genérica para todos os inputs e selects */
     padding: 12px 15px;
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 1rem;
     color: #333;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box; /* Importante para o layout */
 }
 
-.medico-input:focus,
-.consulta-input:focus,
-.user-input:focus,
-.especialidade-input:focus {
+.form-input:focus {
     border-color: #007bff; /* Cor azul ao focar */
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25); /* Sombra suave ao focar */
     outline: none; /* Remove o contorno padrão do navegador */
 }
 
-/* -- Botões -- */
-.medico-btn,
-.consulta-btn,
-.user-btn,
-.especialidade-btn {
-    padding: 12px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: 500;
-    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-    white-space: nowrap; /* Evita que o texto do botão quebre */
-    display: flex; /* Para alinhar ícones e texto */
-    align-items: center;
-    justify-content: center;
-    gap: 8px; /* Espaço entre ícone e texto */
+/* Se precisar de um input menor para edição em tabelas */
+.form-input.small {
+    width: calc(100% - 2px); /* Tenta preencher 100% da célula, subtraindo a borda */
+    padding: 6px 8px; /* Padding menor para caber na célula */
+    margin: 0; /* Remove margens extras */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; /* Crucial para o alinhamento: inclui padding e border na largura */
+    font-size: inherit; /* Herda o tamanho da fonte da célula pai */
+    line-height: normal; /* Garante que a altura da linha não afete */
+    vertical-align: middle; /* Ajuda a alinhar o input verticalmente no meio da célula */
 }
 
-/* Cores dos botões (preenchidos com texto) */
-.medico-btn.add,
-.consulta-btn.add,
-.user-btn.add,
-.especialidade-btn.add { /* Adicionar (manter preenchido) */
-    background-color: #28a745; /* Verde para adicionar */
-    color: white;
-}
-.medico-btn.add:hover,
-.consulta-btn.add:hover,
-.user-btn.add:hover,
-.especialidade-btn.add:hover {
-    background-color: #218838;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-/* A PARTIR DAQUI: ESTILOS PARA OS BOTÕES COM APENAS ÍCONE */
-/* ESTILO GERAL PARA BOTÕES DE ÍCONE (PARA ESPECIALIDADES E UTILIZADORES) */
-/* Crie uma classe comum ou use seletores compostos para aplicar a ambos */
-.action-button, /* Para os botões de ícone do UsersList */
-.especialidade-btn.edit,
-.especialidade-btn.delete,
-.especialidade-btn.save,
-.especialidade-btn.cancel {
-    background: none; /* Fundo transparente */
-    border: 1px solid transparent; /* Borda transparente por padrão, a cor será definida abaixo */
-    padding: 8px; /* Padding ajustado para o ícone */
-    border-radius: 50%; /* Torna o botão redondo */
-    width: 36px; /* Define largura e altura para ser um quadrado perfeito antes do border-radius */
+/* -- Botões de Ação (Ícones) -- */
+.action-button {
+    background: none;
+    border: 1px solid transparent;
+    padding: 8px;
+    border-radius: 50%;
+    width: 36px;
     height: 36px;
-    display: inline-flex; /* Garante que o ícone esteja centralizado */
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0; /* Evita que o botão encolha em layouts flex */
-    box-sizing: border-box; /* Inclui padding e border no tamanho total */
-    font-size: 0; /* Oculta qualquer texto remanescente, só o ícone aparece */
+    flex-shrink: 0;
+    box-sizing: border-box;
+    font-size: 0;
     cursor: pointer;
     transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
-    /* Remover transform e box-shadow padrão para um look mais flat para ícones */
     transform: none;
     box-shadow: none;
 }
 
-/* Cores e Hover para os botões de Ícone */
-
-/* Botão de Editar (Ícone) */
-.action-button.edit,
-.especialidade-btn.edit {
-    border-color: #007bff; /* Borda azul */
-    color: #007bff; /* Cor do ícone azul */
+.action-button.edit {
+    border-color: #007bff;
+    color: #007bff;
 }
-.action-button.edit:hover,
-.especialidade-btn.edit:hover {
-    background-color: #e7f4ff; /* Fundo azul claro ao passar o mouse */
+.action-button.edit:hover {
+    background-color: #e7f4ff;
     color: #0056b3;
     border-color: #0056b3;
 }
 
-/* Botão de Eliminar (Ícone) */
-.action-button.delete,
-.especialidade-btn.delete {
-    border-color: #dc3545; /* Borda vermelha */
-    color: #dc3545; /* Cor do ícone vermelho */
+.action-button.delete {
+    border-color: #dc3545;
+    color: #dc3545;
 }
-.action-button.delete:hover,
-.especialidade-btn.delete:hover {
-    background-color: #fce7e9; /* Fundo vermelho claro ao passar o mouse */
+.action-button.delete:hover {
+    background-color: #fce7e9;
     color: #c82333;
     border-color: #c82333;
 }
 
-/* Botão de Salvar (Ícone) */
-.action-button.save,
-.especialidade-btn.save {
-    border-color: #28a745; /* Borda verde (usei o verde de 'add' para consistência visual de 'sucesso') */
-    color: #28a745; /* Cor do ícone verde */
+.action-button.save {
+    border-color: #28a745;
+    color: #28a745;
 }
-.action-button.save:hover,
-.especialidade-btn.save:hover {
+.action-button.save:hover {
     background-color: #e6ffe6;
     color: #218838;
     border-color: #218838;
 }
 
-/* Botão de Cancelar (Ícone) */
-.action-button.cancel,
-.especialidade-btn.cancel {
-    border-color: #6c757d; /* Borda cinza */
-    color: #6c757d; /* Cor do ícone cinza */
+.action-button.cancel {
+    border-color: #6c757d;
+    color: #6c757d;
 }
-.action-button.cancel:hover,
-.especialidade-btn.cancel:hover {
+.action-button.cancel:hover {
     background-color: #f2f3f5;
     color: #5a6268;
     border-color: #5a6268;
 }
 
-/* FIM DOS ESTILOS DE BOTÃO DE ÍCONE */
-
-
-/* -- Botão "Consultas" em MedicosList -- */
-.medico-btn.consultas {
-    background-color: #ffc107; /* Amarelo para "Consultas" */
-    color: #333;
-    font-weight: bold;
+.action-button.view { /* Botão de "olho" para ver detalhes */
+    border-color: #17a2b8; /* Cor de informação/azul-turquesa */
+    color: #17a2b8;
 }
-.medico-btn.consultas:hover {
-    background-color: #e0a800;
+.action-button.view:hover {
+    background-color: #e0faff;
+    color: #117a8b;
+    border-color: #117a8b;
+}
+
+/* Botão "Adicionar" para formulários (verde) */
+.action-button.add {
+    background-color: #28a745;
+    color: white;
+    border-radius: 5px; /* Adicionar border-radius para consistência */
+    padding: 10px 20px; /* Ajustar padding para botões com texto */
+    font-size: 1rem;
+    width: fit-content; /* Ajusta largura ao conteúdo */
+    /* Remover border e definir padding novamente para substituir o do .action-button genérico */
+    border: none;
+}
+.action-button.add:hover {
+    background-color: #218838;
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-/* Novo estilo para o botão de "Ver Detalhes" em EspecialidadesList (se tiver um) */
-/* Pelo seu código, o "Eye" é no header, não um botão separado */
-/* Se quiser um botão 'view-details' separado, pode usar este estilo */
-.especialidade-btn.view-details {
-    background: none;
-    border: 1px solid #007bff;
-    color: #007bff;
-    padding: 8px; /* Reduzido para ícones */
-    border-radius: 50%; /* Torna-o redondo */
-    width: 36px; /* Tamanho fixo para ser redondo */
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0; /* Evita que encolha */
-}
-.especialidade-btn.view-details:hover {
-    background-color: #e7f4ff;
-    border-color: #0056b3;
-    color: #0056b3;
-}
 
-
-/* -- Tabelas (para Medicos, Consultas, Users) -- */
+/* -- Tabelas (Medicos, Consultas, Users) -- */
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
+    margin-top: 20px; /* Espaço entre o formulário e a tabela */
     background-color: #fff;
     border-radius: 8px;
-    overflow: hidden;
+    overflow: hidden; /* Garante que cantos arredondados sejam aplicados */
 }
 
 thead th {
     background-color: #007bff;
     color: white;
-    padding: 15px; /* Manter este padding para o cabeçalho */
+    padding: 15px;
     text-align: left;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     font-size: 0.9em;
-    /* Adicionar box-sizing para garantir consistência */
     box-sizing: border-box;
 }
 
@@ -280,21 +253,11 @@ tbody tr:hover {
 }
 
 tbody td {
-    padding: 15px; /* Manter este padding para células de texto normal */
+    padding: 15px;
     vertical-align: middle;
     color: #555;
-    /* Adicionar box-sizing para garantir consistência */
     box-sizing: border-box;
 }
-
-/* Ajuste específico para células que contêm inputs em modo de edição */
-/* Se a célula contém um input, podemos ajustar o seu padding para que o input
-   preencha melhor o espaço e o conteúdo se alinhe */
-tbody td:has(.user-input) { /* Usa :has() se o navegador suportar, ou uma classe no HTML */
-    padding: 8px 15px; /* Um pouco menos de padding vertical para acomodar o input */
-    /* Mantenha o padding horizontal (15px) igual ao do <th> */
-}
-
 
 tbody td button {
     margin-right: 8px;
@@ -303,206 +266,174 @@ tbody td button:last-child {
     margin-right: 0;
 }
 
-/* Inputs dentro da tabela para edição */
-tbody td .medico-input,
-tbody td .consulta-input,
-tbody td .user-input {
-    width: calc(100% - 2px); /* Alterado: 100% menos 2px (para a borda do input) */
-    padding: 8px 10px; /* Padding interno do input */
-    font-size: 0.95rem;
-    margin: 0; /* Remover qualquer margem padrão do input */
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box; /* Fundamental: inclui padding e border na largura */
-    vertical-align: middle; /* Ajuda no alinhamento vertical dentro da célula */
+
+/* -- Estilos para a Área de Detalhes Expandida -- */
+.user-details-expanded-area,
+.medico-details-expanded-area, /* Novo para Médicos */
+.consulta-details-expanded-area { /* Novo para Consultas */
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 0 0 8px 8px;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
-/* Se precisar de um input menor para botões (como você tem no UsersList.js para editName) */
-/* Adicione esta regra se 'form-input small' for a classe do input dentro da célula da tabela */
-.form-input.small {
-    width: calc(100% - 2px); /* Tenta preencher 100% da célula, subtraindo a borda */
-    padding: 6px 8px; /* Padding menor para caber na célula */
-    margin: 0; /* Remove margens extras */
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box; /* Crucial para o alinhamento: inclui padding e border na largura */
-    font-size: inherit; /* Herda o tamanho da fonte da célula pai */
-    line-height: normal; /* Garante que a altura da linha não afete */
-    vertical-align: middle; /* Ajuda a alinhar o input verticalmente no meio da célula */
+/* Ajuste para que a área expandida preencha a célula da tabela */
+td[colspan] > .user-details-expanded-area,
+td[colspan] > .medico-details-expanded-area,
+td[colspan] > .consulta-details-expanded-area {
+    margin: -15px; /* Compensa o padding da célula da tabela */
+    border-radius: 0;
+    box-shadow: none;
 }
 
-/* -- EspecialidadesList - Estilos Específicos -- */
-/* A lista UL que contém os itens de especialidade */
-.especialidades-list {
-    list-style: none; /* Remove os marcadores padrão */
+/* Grid para organizar os "cards" dentro da área expandida */
+.details-cards-grid { /* Usado para user-details-cards-grid e medico-details-cards-grid */
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+/* Estilo base para os "cards" dentro da área expandida */
+.details-card { /* Usado para .card em user-details-expanded-area e medico-details-expanded-area */
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #eee;
+}
+
+.details-card .card-title {
+    margin-top: 0;
+    color: #333;
+    font-size: 1.1em;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+}
+
+.details-card .card-text {
+    font-size: 0.9em;
+    color: #555;
+}
+
+/* -- Estilos para Tags/Botões (nomes de Médicos/Especialidades) -- */
+.doctor-tags, .specialty-tags { /* Contêiner para as tags */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.doctor-tag, .specialty-tag { /* Estilo individual da tag */
+    background-color: #e0f2f7; /* Um azul claro */
+    color: #007bff; /* Cor do texto azul */
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: 500;
+    border: 1px solid #cce5ff;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.doctor-tag:hover, .specialty-tag:hover {
+    background-color: #d1ecf1;
+    cursor: default;
+}
+
+/* Estilo para listas de consultas pequenas (dentro de cards) */
+.consultas-list-small {
+    list-style: none;
     padding: 0;
     margin: 0;
-    /* Optional: Adicione uma borda leve para agrupar os itens da lista dentro do card */
+    max-height: 150px;
+    overflow-y: auto;
     border: 1px solid #eee;
-    border-radius: 5px;
-    overflow: hidden; /* Importante para que os border-radius funcionem nos itens */
+    border-radius: 4px;
+    background-color: #fcfcfc;
+    padding-right: 5px;
 }
 
-/* Cada item LI da lista de especialidades */
-.especialidade-item {
-    border-bottom: 1px solid #eee;
-    padding: 15px;
-    display: flex;
-    flex-direction: column; /* Organiza o cabeçalho e detalhes em coluna */
-}
-
-.especialidade-item:last-child {
-    border-bottom: none; /* Remove a linha de baixo do último item */
-}
-
-/* O cabeçalho de cada item de especialidade (clicável para expandir) */
-.especialidade-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    font-size: 1.1em;
-    font-weight: 500;
-    color: #333;
-    padding: 0; /* Remover padding aqui e deixar apenas no .especialidade-item se necessário */
-    /* transition: background-color 0.2s ease; */ /* Opcional: efeito hover no header */
-}
-
-/* .especialidade-header:hover {
-    background-color: #f9f9f9;
-} */
-
-
-/* A área de detalhes da especialidade (quando expandida) */
-.especialidade-details {
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 1px dashed #ddd; /* Linha tracejada para separar o header dos detalhes */
-    /* Removido padding-left: 12px; para usar o gap do flexbox no especialidade-actions-row */
-    padding-left: 0; /* Reset para não ter indentação extra aqui */
-    padding-right: 0;
-}
-
-/* Linha de botões de ação dentro dos detalhes (Editar, Eliminar) */
-.especialidade-actions-row {
-    display: flex;
-    gap: 10px; /* Espaçamento entre os botões */
-    margin-top: 10px;
-    justify-content: flex-start; /* Alinha os botões à esquerda (como nos utilizadores) */
-    align-items: center; /* Alinha verticalmente */
-    margin-bottom: 10px; /* Espaço abaixo dos botões de ação */
-}
-
-/* Estilo para a lista de médicos dentro dos detalhes da especialidade */
-.especialidade-details strong {
-    display: block; /* Para o título "Médicos desta especialidade" ficar em sua própria linha */
-    margin-bottom: 8px;
+.consultas-list-small li {
+    padding: 6px 8px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.85em;
     color: #555;
-    font-size: 1em;
 }
 
-.especialidade-details ul { /* A UL dos médicos */
-    list-style: none; /* Removido para ter controle total */
-    padding-left: 0;
-    margin-top: 0; /* Ajustado para não ter margem extra */
-    display: flex;
-    flex-wrap: wrap; /* Permite quebrar em várias linhas */
-    gap: 8px; /* Espaçamento entre os "chips" de médico */
+.consultas-list-small li:last-child {
+    border-bottom: none;
 }
 
-.especialidade-details ul li { /* Cada LI (nome do médico) */
-    background-color: #e0f7fa; /* Um fundo suave para cada nome de médico */
-    padding: 5px 10px;
-    border-radius: 20px; /* Formato de "pill" para os nomes */
-    color: #00796b; /* Cor do texto */
-    font-size: 0.85em; /* Tamanho da fonte menor */
-    white-space: nowrap; /* Evita que o nome do médico quebre em várias linhas */
-    border: 1px solid #b2ebf2; /* Uma borda suave */
-    display: inline-flex; /* Para garantir que padding e border se apliquem bem */
-    align-items: center;
+/* Estilo para o select de filtro dentro de detalhes */
+.details-filter-select {
+    margin-bottom: 10px;
+    width: auto;
+    max-width: 100%;
 }
 
-
-.sem-medicos {
-    color: #888;
-    font-style: italic;
-    margin-top: 5px;
-    font-size: 0.9em;
-}
 
 /* -- Mensagens de Erro/Carregamento -- */
-/* Estes estilos já estão a aplicar-se aos cards (users-table, especialidades-card, etc.) */
-.medicos-table,
-.consultas-table,
-.users-table,
-.especialidades-card {
-    /* ... (estilos de card já definidos acima, incluindo text-align: center para carregamento/erro) ... */
-    text-align: center; /* Centraliza "A carregar..." e "Erro..." */
+.loading-message, .error-message {
+    text-align: center;
     font-size: 1.2em;
-    color: #666;
-    /* padding: 50px; /* Pode ser removido se o padding geral do card for suficiente */
+    padding: 20px;
+}
+.error-message {
+    color: #dc3545;
+}
+.loading-message {
+    color: #007bff;
 }
 
 /* -- Responsividade básica -- */
 @media (max-width: 768px) {
-    .medicos-table,
-    .consultas-table,
-    .users-table,
-    .especialidades-card {
-        padding: 20px;
-        margin: 10px;
+    .list-container {
+        padding: 10px;
+    }
+    .form-container, .card-container {
+        padding: 15px;
+        margin: 10px auto;
     }
 
-    .medico-form,
-    .consulta-form,
-    .user-form,
-    .especialidade-form,
-    .especialidade-edit-form { /* Inclua aqui o formulário de edição de especialidades */
-        flex-direction: column; /* Empilha os campos em telas pequenas */
-        align-items: stretch;
+    .form-container .form-row {
+        flex-direction: column;
+        gap: 10px;
     }
-
-    .medico-input,
-    .consulta-input,
-    .user-input,
-    .especialidade-input,
-    .medico-btn,
-    .consulta-btn,
-    .user-btn,
-    .especialidade-btn {
+    .form-container .form-input, .form-container .action-button.add {
         width: 100%;
-        min-width: unset; /* Remove o min-width para preencher 100% */
     }
 
-    /* Estilos de tabela responsiva */
+    /* Tabelas responsivas */
     table, thead, tbody, th, td, tr {
-        display: block; /* Faz a tabela parecer uma lista de cartões */
+        display: block;
     }
-
     thead tr {
         position: absolute;
-        top: -9999px; /* Esconde o cabeçalho da tabela */
+        top: -9999px;
         left: -9999px;
     }
-
     tbody tr {
         margin-bottom: 15px;
         border: 1px solid #ccc;
         border-radius: 8px;
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-
     tbody td {
         border: none;
         position: relative;
-        padding-left: 50%; /* Espaço para o "label" */
+        padding-left: 50%;
         text-align: right;
         padding-top: 8px;
         padding-bottom: 8px;
     }
-
     tbody td:before {
-        content: attr(data-label); /* Usa o atributo data-label como pseudo-elemento */
+        content: attr(data-label);
         position: absolute;
         left: 6px;
         width: 45%;
@@ -512,149 +443,15 @@ tbody td .user-input {
         font-weight: bold;
         color: #333;
     }
-}
 
-/* -- Estilos de Usuário (expandido) -- */
-/* Estilo para a linha do utilizador que é clicável */
-.user-list-item-header {
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
+    td[colspan] > .user-details-expanded-area,
+    td[colspan] > .medico-details-expanded-area,
+    td[colspan] > .consulta-details-expanded-area {
+        margin: 0; /* Remove a margem negativa em mobile para evitar cortes */
+        padding: 15px; /* Padding ajustado para mobile */
+    }
 
-.user-list-item-header:hover {
-    background-color: #f0f0f0; /* Fundo suave ao passar o mouse */
-}
-
-/* Estilo para a área expandida com os detalhes do utilizador */
-.user-details-expanded {
-    background-color: #f9f9f9; /* Fundo mais claro para o conteúdo expandido */
-    padding: 20px;
-    border-radius: 0 0 8px 8px; /* Cantos arredondados apenas na parte inferior */
-    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05); /* Sombra interna suave */
-    display: flex;
-    flex-direction: column;
-    gap: 15px; /* Espaçamento entre seções */
-}
-
-/* Estilos para o formulário de edição dentro da área expandida */
-.user-edit-form {
-    display: flex;
-    flex-wrap: wrap; /* Permite que os campos quebrem a linha */
-    gap: 15px; /* Espaçamento entre os campos do formulário */
-    align-items: center;
-    background-color: #e6f7ff; /* Um fundo diferente para o formulário de edição */
-    padding: 15px;
-    border-radius: 5px;
-    border: 1px solid #91d5ff;
-}
-
-.user-edit-form label {
-    font-weight: bold;
-    min-width: 60px; /* Para alinhar labels */
-}
-
-.user-edit-form .user-input {
-    flex: 1; /* Faz os inputs ocuparem o espaço disponível */
-    min-width: 180px; /* Largura mínima para inputs */
-    padding: 10px;
-}
-
-/* Contêiner geral para as ações e listas de informação */
-.user-actions-details {
-    display: flex;
-    flex-direction: column;
-    gap: 20px; /* Espaçamento maior entre as principais seções */
-}
-
-/* Linha dos botões de ação (Editar, Eliminar) */
-.user-actions-row {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 10px; /* Espaçamento abaixo dos botões de ação */
-}
-
-/* Contêiner para as listas de informações (Médicos, Consultas, etc.) */
-.user-info-lists {
-    display: grid; /* Usar grid para melhor organização das sub-seções */
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Colunas responsivas */
-    gap: 20px;
-}
-
-/* Estilo para cada sub-seção (Médicos, Todas Consultas, Consultas por Especialidade) */
-.user-sub-section {
-    background-color: #fff;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    border: 1px solid #eee;
-}
-
-.user-sub-section h4 {
-    margin-top: 0;
-    color: #333;
-    font-size: 1.1em;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 8px;
-    margin-bottom: 10px;
-}
-
-.doctors-list-inline {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px; /* Espaçamento entre os nomes dos médicos */
-}
-
-.doctors-list-inline li {
-    background-color: #e0f7fa;
-    color: #00796b;
-    padding: 4px 10px;
-    border-radius: 20px; /* Formato de "pill" */
-    font-size: 0.85em;
-    white-space: nowrap;
-    border: 1px solid #b2ebf2;
-}
-
-/* Estilo para listas de consultas com rolagem */
-.appointments-list-scroll {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    max-height: 200px; /* Altura máxima antes de ativar a rolagem */
-    overflow-y: auto; /* Ativa a rolagem vertical */
-    border: 1px solid #eee;
-    border-radius: 4px;
-    background-color: #fcfcfc;
-    padding-right: 5px; /* Espaço para a barra de rolagem */
-}
-
-.appointments-list-scroll li {
-    padding: 8px 10px;
-    border-bottom: 1px solid #f0f0f0;
-    font-size: 0.9em;
-    color: #555;
-}
-
-.appointments-list-scroll li:last-child {
-    border-bottom: none;
-}
-
-/* Estilo para o botão "Ver todas as Consultas na página dedicada" */
-.user-btn.view-all-consultas {
-    background-color: #007bff; /* Azul para um botão de navegação */
-    color: white;
-    margin-top: 10px; /* Espaçamento acima do botão */
-    width: fit-content; /* Ajusta a largura ao conteúdo */
-    align-self: flex-start; /* Alinha à esquerda na coluna */
-}
-
-.user-btn.view-all-consultas:hover {
-    background-color: #0056b3;
-}
-
-/* Ajustes para o select de especialidade dentro da área expandida */
-.user-details-expanded .user-input {
-    margin-bottom: 10px; /* Espaçamento abaixo do select */
+    .details-cards-grid {
+        grid-template-columns: 1fr; /* Uma coluna em mobile */
+    }
 }

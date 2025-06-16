@@ -1,34 +1,32 @@
 import React, { useEffect, useState } from 'react';
 import { Edit, Trash2, Save, X, Eye, PlusCircle } from 'lucide-react';
-import './components.css'; // Certifique-se de que este caminho está correto
-import api from '../api/api'; // Certifique-se de que este caminho está correto
+import './components.css';
+import api from '../api/api';
 
 function UsersList({ user, token, showMessage }) {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+
     const [editUserId, setEditUserId] = useState(null);
     const [editName, setEditName] = useState('');
-    const [editEmail, setEditEmail] = useState('');
-    const [editRole, setEditRole] = useState('');
+
     const [expandedUserId, setExpandedUserId] = useState(null);
+    const [expandedUserDetails, setExpandedUserDetails] = useState(null);
     const [userConsultas, setUserConsultas] = useState([]);
     const [userDoctors, setUserDoctors] = useState([]);
     const [userConsultasError, setUserConsultasError] = useState('');
     const [specialtiesForFilter, setSpecialtiesForFilter] = useState([]);
     const [selectedSpecialtyFilter, setSelectedSpecialtyFilter] = useState('');
 
-    // Estados para o formulário de adição de novo utilizador
     const [newUserName, setNewUserName] = useState('');
     const [newUserEmail, setNewUserEmail] = useState('');
     const [newUserGoogleId, setNewUserGoogleId] = useState('');
-    const [newUserRole, setNewUserRole] = useState('user'); // Default para 'user'
+    const [newUserRole, setNewUserRole] = useState('user');
 
     useEffect(() => {
         fetchUsers();
         fetchSpecialtiesForFilter();
-        // A dependência `token` é importante para refetch em caso de mudança de autenticação.
-        // `eslint-disable-next-line react-hooks/exhaustive-deps` foi removido para ESLint warnings se necessário.
     }, [token]);
 
     /**
@@ -77,24 +75,20 @@ function UsersList({ user, token, showMessage }) {
         setUserConsultasError('');
 
         try {
-            // 1. Chamar GET /users/:id para obter email e role
             const userDetailsResponse = await api.get(`/users/${userId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             const fetchedUserDetail = userDetailsResponse.data;
+            setExpandedUserDetails(fetchedUserDetail);
 
-            // Atualiza o usuário na lista com email e role para exibição na área expandida
-            setUsers(prevUsers => prevUsers.map(u =>
-                u.id === userId ? { ...u, email: fetchedUserDetail.email, role: fetchedUserDetail.role } : u
-            ));
-
-            // 2. Chamar GET /users/:userId/appointments para obter todas as consultas
             const appointmentsResponse = await api.get(`/users/${userId}/appointments`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             const formattedConsultas = appointmentsResponse.data.map(c => {
-                // CORREÇÃO: Acessar c.date, não c.data
-                const dateObj = new Date(c.date);
+                // Combina c.date e c.time para criar um objeto Date válido.
+                // Assumindo que c.date é 'YYYY-MM-DD' e c.time é 'HH:MM:SS'
+                const dateTimeString = `${c.date}T${c.time}`;
+                const dateObj = new Date(dateTimeString);
                 const dataDisplay = isNaN(dateObj.getTime()) ? 'Data Inválida' : dateObj.toLocaleString('pt-PT', {
                     year: 'numeric', month: '2-digit', day: '2-digit',
                     hour: '2-digit', minute: '2-digit', hour12: false
@@ -104,23 +98,22 @@ function UsersList({ user, token, showMessage }) {
                     ...c,
                     dataDisplay,
                     medicoName: c.medico?.name || 'Médico Desconhecido',
-                    // CORREÇÃO: Acessar especialidade através do médico aninhado
                     specialtyName: c.medico?.specialty?.name || 'Especialidade Desconhecida'
                 };
             });
             setUserConsultas(formattedConsultas);
 
-            // 3. Chamar GET /users/:userId/doctors para obter os médicos consultados
             const doctorsResponse = await api.get(`/users/${userId}/doctors`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setUserDoctors(doctorsResponse.data || []);
 
-            setSelectedSpecialtyFilter(''); // Resetar filtro de especialidade ao carregar novos detalhes
+            setSelectedSpecialtyFilter('');
 
         } catch (err) {
             console.error(`Erro ao carregar detalhes para o usuário ${userId}:`, err);
             setUserConsultasError('Erro ao carregar detalhes do utilizador. ' + (err.response?.data?.error || ''));
+            setExpandedUserDetails(null);
         }
     };
 
@@ -131,13 +124,14 @@ function UsersList({ user, token, showMessage }) {
      */
     const handleExpandUser = async (userId) => {
         if (expandedUserId === userId) {
-            setExpandedUserId(null); // Colapsa
-            setUserConsultas([]); // Limpa consultas
-            setUserDoctors([]); // Limpa médicos
-            setSelectedSpecialtyFilter(''); // Limpa filtro
+            setExpandedUserId(null);
+            setExpandedUserDetails(null);
+            setUserConsultas([]);
+            setUserDoctors([]);
+            setSelectedSpecialtyFilter('');
         } else {
-            setExpandedUserId(userId); // Expande
-            await fetchUserDetails(userId); // Busca detalhes
+            setExpandedUserId(userId);
+            await fetchUserDetails(userId);
         }
     };
 
@@ -149,8 +143,6 @@ function UsersList({ user, token, showMessage }) {
     const startEdit = (userToEdit) => {
         setEditUserId(userToEdit.id);
         setEditName(userToEdit.name);
-        setEditEmail(userToEdit.email || '');
-        setEditRole(userToEdit.role || 'user');
     };
 
     /**
@@ -162,9 +154,6 @@ function UsersList({ user, token, showMessage }) {
         try {
             const payload = {
                 name: editName,
-                // O email só deve ser incluído se o backend permitir a edição via PUT
-                email: editEmail,
-                role: editRole
             };
 
             await api.put(`/users/${userId}`, payload, {
@@ -172,9 +161,9 @@ function UsersList({ user, token, showMessage }) {
             });
             showMessage('Utilizador atualizado com sucesso!', 'success');
             setEditUserId(null);
-            fetchUsers(); // Recarrega a lista principal para refletir as alterações
+            fetchUsers();
+
             if (expandedUserId === userId) {
-                // Se o usuário expandido estiver ativo, recarrega os detalhes para pegar email/role atualizados
                 await fetchUserDetails(userId);
             }
         } catch (err) {
@@ -188,7 +177,6 @@ function UsersList({ user, token, showMessage }) {
      * @returns {Promise<void>}
      */
     const handleDeleteUser = async (userId) => {
-        // Alerta de confirmação. Em produção, use um modal personalizado.
         if (!window.confirm('Tem certeza que deseja eliminar este utilizador?')) {
             return;
         }
@@ -199,7 +187,8 @@ function UsersList({ user, token, showMessage }) {
             showMessage('Utilizador eliminado com sucesso!', 'success');
             fetchUsers();
             if (expandedUserId === userId) {
-                setExpandedUserId(null); // Fecha se o user expandido for o apagado
+                setExpandedUserId(null);
+                setExpandedUserDetails(null);
             }
         } catch (err) {
             showMessage(err.response?.data?.error || 'Erro ao eliminar utilizador.', 'error');
@@ -212,7 +201,7 @@ function UsersList({ user, token, showMessage }) {
      * @returns {Promise<void>}
      */
     const handleAddUser = async (e) => {
-        e.preventDefault(); // Evita o recarregamento da página
+        e.preventDefault();
 
         if (!newUserName || !newUserEmail || !newUserRole) {
             showMessage('Por favor, preencha todos os campos obrigatórios (Nome, Email, Perfil).', 'error');
@@ -224,19 +213,18 @@ function UsersList({ user, token, showMessage }) {
                 name: newUserName,
                 email: newUserEmail,
                 role: newUserRole,
-                google_id: newUserGoogleId || null // Envia null se vazio
+                google_id: newUserGoogleId || null
             };
 
             await api.post('/users', payload, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             showMessage('Utilizador adicionado com sucesso!', 'success');
-            // Limpa os campos do formulário
             setNewUserName('');
             setNewUserEmail('');
             setNewUserGoogleId('');
             setNewUserRole('user');
-            fetchUsers(); // Recarrega a lista para mostrar o novo utilizador
+            fetchUsers();
         } catch (err) {
             showMessage(err.response?.data?.error || 'Erro ao adicionar utilizador.', 'error');
         }
@@ -249,11 +237,10 @@ function UsersList({ user, token, showMessage }) {
      */
     const handleFilterConsultasBySpecialty = async (specialtyId) => {
         setSelectedSpecialtyFilter(specialtyId);
-        if (expandedUserId) { // Garante que há um usuário expandido para filtrar
+        if (expandedUserId) {
             try {
                 let url = `/users/${expandedUserId}/appointments`;
                 if (specialtyId) {
-                    // Usa a rota específica para filtrar por especialidade
                     url = `/users/${expandedUserId}/specialties/${specialtyId}/appointments`;
                 }
 
@@ -262,8 +249,8 @@ function UsersList({ user, token, showMessage }) {
                 });
 
                 const formattedFilteredConsultas = filteredAppointmentsResponse.data.map(c => {
-                    // CORREÇÃO: Acessar c.date, não c.data
-                    const dateObj = new Date(c.date);
+                    const dateTimeString = `${c.date}T${c.time}`;
+                    const dateObj = new Date(dateTimeString);
                     const dataDisplay = isNaN(dateObj.getTime()) ? 'Data Inválida' : dateObj.toLocaleString('pt-PT', {
                         year: 'numeric', month: '2-digit', day: '2-digit',
                         hour: '2-digit', minute: '2-digit', hour12: false
@@ -272,7 +259,6 @@ function UsersList({ user, token, showMessage }) {
                         ...c,
                         dataDisplay,
                         medicoName: c.medico?.name || 'Médico Desconhecido',
-                        // CORREÇÃO: Acessar especialidade através do médico aninhado
                         specialtyName: c.medico?.specialty?.name || 'Especialidade Desconhecida'
                     };
                 });
@@ -282,14 +268,11 @@ function UsersList({ user, token, showMessage }) {
                 setUserConsultasError('Erro ao filtrar consultas por especialidade. ' + (err.response?.data?.error || ''));
             }
         }
-        // Se o filtro for "Todas as Especialidades" (specialtyId vazio) ou não houver usuário expandido inicialmente,
-        // recarrega os detalhes completos do utilizador para mostrar todas as consultas.
         if (!specialtyId && expandedUserId) {
             await fetchUserDetails(expandedUserId);
         }
     };
 
-    // Renderiza mensagens de carregamento e erro globais
     if (loading) return <div className="list-container"><div className="loading-message">A carregar utilizadores...</div></div>;
     if (error) return <div className="list-container"><div className="error-message">{error}</div></div>;
 
@@ -297,7 +280,6 @@ function UsersList({ user, token, showMessage }) {
         <div className="list-container">
             <h2 className="list-title">Gestão de Utilizadores</h2>
 
-            {/* Formulário de Adição de Novo Utilizador - Apenas Admin pode ver */}
             {user?.role === 'admin' && (
                 <form onSubmit={handleAddUser} className="form-container" style={{ marginBottom: '20px' }}>
                     <h3 className="form-section-title">Adicionar Novo Utilizador</h3>
@@ -350,8 +332,6 @@ function UsersList({ user, token, showMessage }) {
                         <tr>
                             <th>ID</th>
                             <th>Nome</th>
-                            <th>Email</th>
-                            <th>Perfil</th>
                             <th>Ações</th>
                         </tr>
                     </thead>
@@ -369,31 +349,6 @@ function UsersList({ user, token, showMessage }) {
                                                 className="form-input small"
                                             />
                                         ) : u.name}
-                                    </td>
-                                    <td>
-                                        {editUserId === u.id ? (
-                                            <input
-                                                type="email"
-                                                value={editEmail}
-                                                onChange={e => setEditEmail(e.target.value)}
-                                                className="form-input small"
-                                                // Recomendado manter disabled={true} se o backend não permite a edição de email
-                                                // disabled={true}
-                                            />
-                                        ) : (u.email || 'N/A')}
-                                    </td>
-                                    <td>
-                                        {editUserId === u.id ? (
-                                            <select
-                                                value={editRole}
-                                                onChange={e => setEditRole(e.target.value)}
-                                                className="form-input small"
-                                                disabled={user?.role !== 'admin'} // Apenas admin pode alterar o role
-                                            >
-                                                <option value="user">Utilizador</option>
-                                                <option value="admin">Admin</option>
-                                            </select>
-                                        ) : (u.role || 'N/A')}
                                     </td>
                                     <td>
                                         {editUserId === u.id ? (
@@ -420,11 +375,13 @@ function UsersList({ user, token, showMessage }) {
                                         )}
                                     </td>
                                 </tr>
-                                {expandedUserId === u.id && (
+                                {expandedUserId === u.id && expandedUserDetails && (
                                     <tr>
-                                        <td colSpan="5">
+                                        <td colSpan="3"> {/* Ajustado colSpan para 3 colunas */}
                                             <div className="user-details-expanded-area">
-                                                <h4>Detalhes para {u.name} ({u.email || 'Email Indisponível'}) - Perfil: {u.role || 'Indefinido'}</h4>
+                                                <h4>Detalhes para {expandedUserDetails.name}</h4>
+                                                <p><strong>Email:</strong> {expandedUserDetails.email || 'N/A'}</p>
+                                                <p><strong>Perfil:</strong> {expandedUserDetails.role || 'N/A'}</p>
                                                 {userConsultasError && <div className="error-message">{userConsultasError}</div>}
                                                 <div className="user-details-cards-grid">
                                                     <div className="card">
@@ -432,6 +389,7 @@ function UsersList({ user, token, showMessage }) {
                                                         {userDoctors.length > 0 ? (
                                                             <div className="doctor-tags">
                                                                 {userDoctors.map(doc => (
+                                                                    // AQUI ESTÁ A MUDANÇA: Usando 'doctor-tag' para estilizar
                                                                     <span key={doc.id} className="doctor-tag">{doc.name}</span>
                                                                 ))}
                                                             </div>
@@ -457,7 +415,7 @@ function UsersList({ user, token, showMessage }) {
                                                             <ul className="consultas-list-small">
                                                                 {userConsultas.map(c => (
                                                                     <li key={c.id} className="card-text small-text">
-                                                                        {c.dataDisplay} - {c.medicoName} ({c.specialtyName})
+                                                                        {c.dataDisplay} - {c.medicoName} ({c.specialtyName}) - Notas: {c.notes || 'N/A'}
                                                                     </li>
                                                                 ))}
                                                             </ul>
