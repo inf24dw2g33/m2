@@ -1,363 +1,482 @@
 import React, { useEffect, useState } from 'react';
-import './components.css';
-import api from '../api/api';
-import { Trash2, Edit, Save, X, Eye, PlusCircle } from 'lucide-react';
+import { Edit, Trash2, Save, X, Eye, PlusCircle } from 'lucide-react';
+import './components.css'; // Certifique-se de que este caminho está correto
+import api from '../api/api'; // Certifique-se de que este caminho está correto
 
-// MUDANÇA: 'setView' não será mais necessário aqui, pois as consultas serão exibidas diretamente
-function UsersList({ showMessage, token, user }) { // Removido 'setView' das props
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [erro, setErro] = useState('');
+function UsersList({ user, token, showMessage }) {
+    const [users, setUsers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [editUserId, setEditUserId] = useState(null);
+    const [editName, setEditName] = useState('');
+    const [editEmail, setEditEmail] = useState('');
+    const [editRole, setEditRole] = useState('');
+    const [expandedUserId, setExpandedUserId] = useState(null);
+    const [userConsultas, setUserConsultas] = useState([]);
+    const [userDoctors, setUserDoctors] = useState([]);
+    const [userConsultasError, setUserConsultasError] = useState('');
+    const [specialtiesForFilter, setSpecialtiesForFilter] = useState([]);
+    const [selectedSpecialtyFilter, setSelectedSpecialtyFilter] = useState('');
 
-  const [newName, setNewName] = useState('');
-  const [newEmail, setNewEmail] = useState('');
-  const [newGoogleId, setNewGoogleId] = useState('');
-  const [newRole, setNewRole] = useState('user');
+    // Estados para o formulário de adição de novo utilizador
+    const [newUserName, setNewUserName] = useState('');
+    const [newUserEmail, setNewUserEmail] = useState('');
+    const [newUserGoogleId, setNewUserGoogleId] = useState('');
+    const [newUserRole, setNewUserRole] = useState('user'); // Default para 'user'
 
-  const [editId, setEditId] = useState(null);
-  const [editName, setEditName] = useState('');
-  const [editEmail, setEditEmail] = useState('');
-  const [editRole, setEditRole] = useState('');
-
-  const [expandedUserId, setExpandedUserId] = useState(null);
-
-  const [doctorsForExpandedUser, setDoctorsForExpandedUser] = useState([]);
-  const [appointmentsForExpandedUser, setAppointmentsForExpandedUser] = useState([]);
-  const [specialties, setSpecialties] = useState([]);
-  const [specAppointmentsForExpandedUser, setSpecAppointmentsForExpandedUser] = useState([]);
-  const [selectedSpecialtyForAppointments, setSelectedSpecialtyForAppointments] = useState('');
-
-  useEffect(() => {
-    if (token) {
-      fetchUsers();
-      fetchSpecialties();
-    } else {
-      setErro('Token de autenticação não encontrado.');
-      setLoading(false);
-    }
-  }, [token]);
-
-  const fetchUsers = () => {
-    setLoading(true);
-    api.get('/users', {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(res => {
-        setUsers(res.data);
-        setLoading(false);
-      })
-      .catch(error => {
-        console.error('Erro ao carregar utilizadores:', error);
-        setErro('Erro ao carregar utilizadores: ' + (error.response?.data?.error || error.message));
-        setLoading(false);
-      });
-  };
-
-  const fetchSpecialties = () => {
-    api.get('/specialties', {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(res => setSpecialties(res.data))
-      .catch(err => console.error('Erro ao carregar especialidades:', err));
-  };
-
-  const handleAdd = (e) => {
-    e.preventDefault();
-    if (!newName || !newEmail || !newRole) {
-      showMessage && showMessage('Por favor, preencha todos os campos obrigatórios.', 'error');
-      return;
-    }
-    api.post('/users', { name: newName, email: newEmail, google_id: newGoogleId, role: newRole }, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(() => {
-        setNewName('');
-        setNewEmail('');
-        setNewGoogleId('');
-        setNewRole('user');
+    useEffect(() => {
         fetchUsers();
-        showMessage && showMessage('Utilizador adicionado!', 'success');
-      })
-      .catch(err => {
-        console.error("Erro ao adicionar utilizador:", err.response?.data || err);
-        showMessage && showMessage(err.response?.data?.error || 'Erro ao adicionar utilizador', 'error');
-      });
-  };
+        fetchSpecialtiesForFilter();
+        // A dependência `token` é importante para refetch em caso de mudança de autenticação.
+        // `eslint-disable-next-line react-hooks/exhaustive-deps` foi removido para ESLint warnings se necessário.
+    }, [token]);
 
-  const handleEdit = (e) => {
-    e.preventDefault();
-    if (!editName || !editEmail || !editRole) {
-      showMessage && showMessage('Por favor, preencha todos os campos obrigatórios.', 'error');
-      return;
-    }
-    api.put(`/users/${editId}`, { name: editName, email: editEmail, role: editRole }, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(() => {
-        setEditId(null);
-        setEditName('');
-        setEditEmail('');
-        setEditRole('');
-        fetchUsers();
-        showMessage && showMessage('Utilizador atualizado!', 'success');
-      })
-      .catch(err => {
-        console.error("Erro ao editar utilizador:", err.response?.data || err);
-        showMessage && showMessage(err.response?.data?.error || 'Erro ao editar utilizador', 'error');
-      });
-  };
+    /**
+     * @brief Busca a lista de todos os utilizadores do backend.
+     * @param {void}
+     * @returns {void}
+     */
+    const fetchUsers = () => {
+        setLoading(true);
+        api.get('/users', {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+            .then(res => {
+                setUsers(res.data);
+                setLoading(false);
+                setError('');
+            })
+            .catch((err) => {
+                console.error("Erro ao carregar utilizadores:", err);
+                setError('Erro ao carregar utilizadores. ' + (err.response?.data?.error || ''));
+                setLoading(false);
+            });
+    };
 
-  const handleDelete = (id) => {
-    if (!window.confirm('Tem certeza que quer eliminar este utilizador?')) return;
-    api.delete(`/users/${id}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(() => {
-        fetchUsers();
-        showMessage && showMessage('Utilizador eliminado!', 'success');
-      })
-      .catch(err => {
-        console.error("Erro ao eliminar utilizador:", err.response?.data || err);
-        showMessage && showMessage(err.response?.data?.error || 'Erro ao eliminar utilizador', 'error');
-      });
-  };
+    /**
+     * @brief Busca a lista de especialidades para o filtro de consultas.
+     * @param {void}
+     * @returns {void}
+     */
+    const fetchSpecialtiesForFilter = () => {
+        api.get('/specialties', {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+            .then(res => setSpecialtiesForFilter(res.data))
+            .catch(err => console.error('Erro ao carregar especialidades para filtro:', err));
+    };
 
-  const handleToggleDetails = (userId) => {
-    setExpandedUserId(expandedUserId === userId ? null : userId);
-    if (expandedUserId !== userId) {
-      fetchDoctorsForUser(userId);
-      fetchAppointmentsForUser(userId);
-      setSpecAppointmentsForExpandedUser([]);
-      setSelectedSpecialtyForAppointments('');
-    }
-  };
+    /**
+     * @brief Busca os detalhes de um utilizador específico, suas consultas e médicos consultados.
+     * @param {string} userId - O ID do utilizador cujos detalhes serão buscados.
+     * @returns {Promise<void>}
+     */
+    const fetchUserDetails = async (userId) => {
+        setUserConsultas([]);
+        setUserDoctors([]);
+        setUserConsultasError('');
 
-  const fetchDoctorsForUser = (userId) => {
-    api.get(`/users/${userId}/doctors`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(res => setDoctorsForExpandedUser(res.data))
-      .catch(error => console.error('Erro ao carregar médicos do utilizador:', error));
-  };
+        try {
+            // 1. Chamar GET /users/:id para obter email e role
+            const userDetailsResponse = await api.get(`/users/${userId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const fetchedUserDetail = userDetailsResponse.data;
 
-  const fetchAppointmentsForUser = (userId) => {
-    api.get(`/users/${userId}/appointments`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(res => {
-        setAppointmentsForExpandedUser(res.data);
-      })
-      .catch(error => console.error('Erro ao carregar consultas do utilizador:', error));
-  };
+            // Atualiza o usuário na lista com email e role para exibição na área expandida
+            setUsers(prevUsers => prevUsers.map(u =>
+                u.id === userId ? { ...u, email: fetchedUserDetail.email, role: fetchedUserDetail.role } : u
+            ));
 
-  const handleFetchSpecAppointments = (userId, specialtyId) => {
-    if (!specialtyId) {
-      setSpecAppointmentsForExpandedUser([]);
-      return;
-    }
-    api.get(`/users/${userId}/specialties/${specialtyId}/appointments`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(res => setSpecAppointmentsForExpandedUser(res.data))
-      .catch(error => console.error('Erro ao carregar consultas por especialidade:', error));
-  };
+            // 2. Chamar GET /users/:userId/appointments para obter todas as consultas
+            const appointmentsResponse = await api.get(`/users/${userId}/appointments`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const formattedConsultas = appointmentsResponse.data.map(c => {
+                // CORREÇÃO: Acessar c.date, não c.data
+                const dateObj = new Date(c.date);
+                const dataDisplay = isNaN(dateObj.getTime()) ? 'Data Inválida' : dateObj.toLocaleString('pt-PT', {
+                    year: 'numeric', month: '2-digit', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit', hour12: false
+                });
 
-  // MUDANÇA: Esta função não é mais necessária
-  // const handleViewAllUserAppointmentsPage = (userId, userName) => {
-  //   localStorage.setItem('filterPatientId', userId);
-  //   localStorage.setItem('filterPatientName', userName);
-  //   setView('Consultas');
-  // };
+                return {
+                    ...c,
+                    dataDisplay,
+                    medicoName: c.medico?.name || 'Médico Desconhecido',
+                    // CORREÇÃO: Acessar especialidade através do médico aninhado
+                    specialtyName: c.medico?.specialty?.name || 'Especialidade Desconhecida'
+                };
+            });
+            setUserConsultas(formattedConsultas);
 
-  if (loading) return <div className="users-container"><div className="users-table">A carregar utilizadores...</div></div>;
-  if (erro) return <div className="users-container"><div className="users-table">{erro}</div></div>;
+            // 3. Chamar GET /users/:userId/doctors para obter os médicos consultados
+            const doctorsResponse = await api.get(`/users/${userId}/doctors`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setUserDoctors(doctorsResponse.data || []);
 
-  return (
-    <div className="users-container">
-      <div className="users-table">
-        <h2>Gestão de Utilizadores</h2>
+            setSelectedSpecialtyFilter(''); // Resetar filtro de especialidade ao carregar novos detalhes
 
-        {user?.role === 'admin' && (
-          <form onSubmit={handleAdd} className="user-form">
-            <input type="text" placeholder="Nome" value={newName} onChange={e => setNewName(e.target.value)} className="user-input" required />
-            <input type="email" placeholder="Email" value={newEmail} onChange={e => setNewEmail(e.target.value)} className="user-input" required />
-            <input type="text" placeholder="Google ID (Opcional)" value={newGoogleId} onChange={e => setNewGoogleId(e.target.value)} className="user-input" />
-            <select value={newRole} onChange={e => setNewRole(e.target.value)} className="user-input">
-              <option value="user">User</option>
-              <option value="admin">Admin</option>
-            </select>
-            <button type="submit" className="user-btn add" title="Adicionar Utilizador">
-              <PlusCircle size={20} /> Adicionar
-            </button>
-          </form>
-        )}
+        } catch (err) {
+            console.error(`Erro ao carregar detalhes para o usuário ${userId}:`, err);
+            setUserConsultasError('Erro ao carregar detalhes do utilizador. ' + (err.response?.data?.error || ''));
+        }
+    };
 
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nome</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map(u => (
-              <React.Fragment key={u.id}>
-                <tr onClick={() => handleToggleDetails(u.id)} className="user-list-item-header">
-                  <td>{u.id}</td>
-                  <td>{u.name}</td>
-                  <td>{u.email}</td>
-                  <td>{u.role}</td>
-                  <td>
-                    <button className="user-btn view-details" onClick={() => handleToggleDetails(u.id)} title="Ver Detalhes">
-                      <Eye size={18} />
+    /**
+     * @brief Alterna a exibição dos detalhes de um utilizador (expande/colapsa).
+     * @param {string} userId - O ID do utilizador a expandir/colapsar.
+     * @returns {Promise<void>}
+     */
+    const handleExpandUser = async (userId) => {
+        if (expandedUserId === userId) {
+            setExpandedUserId(null); // Colapsa
+            setUserConsultas([]); // Limpa consultas
+            setUserDoctors([]); // Limpa médicos
+            setSelectedSpecialtyFilter(''); // Limpa filtro
+        } else {
+            setExpandedUserId(userId); // Expande
+            await fetchUserDetails(userId); // Busca detalhes
+        }
+    };
+
+    /**
+     * @brief Inicia o modo de edição para um utilizador.
+     * @param {object} userToEdit - O objeto utilizador a ser editado.
+     * @returns {void}
+     */
+    const startEdit = (userToEdit) => {
+        setEditUserId(userToEdit.id);
+        setEditName(userToEdit.name);
+        setEditEmail(userToEdit.email || '');
+        setEditRole(userToEdit.role || 'user');
+    };
+
+    /**
+     * @brief Salva as edições de um utilizador no backend.
+     * @param {string} userId - O ID do utilizador a ser salvo.
+     * @returns {Promise<void>}
+     */
+    const handleSaveEdit = async (userId) => {
+        try {
+            const payload = {
+                name: editName,
+                // O email só deve ser incluído se o backend permitir a edição via PUT
+                email: editEmail,
+                role: editRole
+            };
+
+            await api.put(`/users/${userId}`, payload, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            showMessage('Utilizador atualizado com sucesso!', 'success');
+            setEditUserId(null);
+            fetchUsers(); // Recarrega a lista principal para refletir as alterações
+            if (expandedUserId === userId) {
+                // Se o usuário expandido estiver ativo, recarrega os detalhes para pegar email/role atualizados
+                await fetchUserDetails(userId);
+            }
+        } catch (err) {
+            showMessage(err.response?.data?.error || 'Erro ao atualizar utilizador.', 'error');
+        }
+    };
+
+    /**
+     * @brief Elimina um utilizador do backend após confirmação.
+     * @param {string} userId - O ID do utilizador a ser eliminado.
+     * @returns {Promise<void>}
+     */
+    const handleDeleteUser = async (userId) => {
+        // Alerta de confirmação. Em produção, use um modal personalizado.
+        if (!window.confirm('Tem certeza que deseja eliminar este utilizador?')) {
+            return;
+        }
+        try {
+            await api.delete(`/users/${userId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            showMessage('Utilizador eliminado com sucesso!', 'success');
+            fetchUsers();
+            if (expandedUserId === userId) {
+                setExpandedUserId(null); // Fecha se o user expandido for o apagado
+            }
+        } catch (err) {
+            showMessage(err.response?.data?.error || 'Erro ao eliminar utilizador.', 'error');
+        }
+    };
+
+    /**
+     * @brief Adiciona um novo utilizador ao backend.
+     * @param {Event} e - O evento de submissão do formulário.
+     * @returns {Promise<void>}
+     */
+    const handleAddUser = async (e) => {
+        e.preventDefault(); // Evita o recarregamento da página
+
+        if (!newUserName || !newUserEmail || !newUserRole) {
+            showMessage('Por favor, preencha todos os campos obrigatórios (Nome, Email, Perfil).', 'error');
+            return;
+        }
+
+        try {
+            const payload = {
+                name: newUserName,
+                email: newUserEmail,
+                role: newUserRole,
+                google_id: newUserGoogleId || null // Envia null se vazio
+            };
+
+            await api.post('/users', payload, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            showMessage('Utilizador adicionado com sucesso!', 'success');
+            // Limpa os campos do formulário
+            setNewUserName('');
+            setNewUserEmail('');
+            setNewUserGoogleId('');
+            setNewUserRole('user');
+            fetchUsers(); // Recarrega a lista para mostrar o novo utilizador
+        } catch (err) {
+            showMessage(err.response?.data?.error || 'Erro ao adicionar utilizador.', 'error');
+        }
+    };
+
+    /**
+     * @brief Filtra as consultas do utilizador expandido por especialidade.
+     * @param {string} specialtyId - O ID da especialidade para filtrar (ou vazio para todas).
+     * @returns {Promise<void>}
+     */
+    const handleFilterConsultasBySpecialty = async (specialtyId) => {
+        setSelectedSpecialtyFilter(specialtyId);
+        if (expandedUserId) { // Garante que há um usuário expandido para filtrar
+            try {
+                let url = `/users/${expandedUserId}/appointments`;
+                if (specialtyId) {
+                    // Usa a rota específica para filtrar por especialidade
+                    url = `/users/${expandedUserId}/specialties/${specialtyId}/appointments`;
+                }
+
+                const filteredAppointmentsResponse = await api.get(url, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
+                const formattedFilteredConsultas = filteredAppointmentsResponse.data.map(c => {
+                    // CORREÇÃO: Acessar c.date, não c.data
+                    const dateObj = new Date(c.date);
+                    const dataDisplay = isNaN(dateObj.getTime()) ? 'Data Inválida' : dateObj.toLocaleString('pt-PT', {
+                        year: 'numeric', month: '2-digit', day: '2-digit',
+                        hour: '2-digit', minute: '2-digit', hour12: false
+                    });
+                    return {
+                        ...c,
+                        dataDisplay,
+                        medicoName: c.medico?.name || 'Médico Desconhecido',
+                        // CORREÇÃO: Acessar especialidade através do médico aninhado
+                        specialtyName: c.medico?.specialty?.name || 'Especialidade Desconhecida'
+                    };
+                });
+                setUserConsultas(formattedFilteredConsultas);
+            } catch (err) {
+                console.error('Erro ao filtrar consultas por especialidade:', err);
+                setUserConsultasError('Erro ao filtrar consultas por especialidade. ' + (err.response?.data?.error || ''));
+            }
+        }
+        // Se o filtro for "Todas as Especialidades" (specialtyId vazio) ou não houver usuário expandido inicialmente,
+        // recarrega os detalhes completos do utilizador para mostrar todas as consultas.
+        if (!specialtyId && expandedUserId) {
+            await fetchUserDetails(expandedUserId);
+        }
+    };
+
+    // Renderiza mensagens de carregamento e erro globais
+    if (loading) return <div className="list-container"><div className="loading-message">A carregar utilizadores...</div></div>;
+    if (error) return <div className="list-container"><div className="error-message">{error}</div></div>;
+
+    return (
+        <div className="list-container">
+            <h2 className="list-title">Gestão de Utilizadores</h2>
+
+            {/* Formulário de Adição de Novo Utilizador - Apenas Admin pode ver */}
+            {user?.role === 'admin' && (
+                <form onSubmit={handleAddUser} className="form-container" style={{ marginBottom: '20px' }}>
+                    <h3 className="form-section-title">Adicionar Novo Utilizador</h3>
+                    <p className="form-info-text">Preencha os campos para adicionar um novo utilizador. Note que o campo 'Google ID' é opcional.</p>
+                    <div className="form-row">
+                        <input
+                            type="text"
+                            placeholder="Nome"
+                            value={newUserName}
+                            onChange={e => setNewUserName(e.target.value)}
+                            className="form-input"
+                            required
+                        />
+                        <input
+                            type="email"
+                            placeholder="Email"
+                            value={newUserEmail}
+                            onChange={e => setNewUserEmail(e.target.value)}
+                            className="form-input"
+                            required
+                        />
+                    </div>
+                    <div className="form-row">
+                        <input
+                            type="text"
+                            placeholder="Google ID (Opcional)"
+                            value={newUserGoogleId}
+                            onChange={e => setNewUserGoogleId(e.target.value)}
+                            className="form-input"
+                        />
+                        <select
+                            value={newUserRole}
+                            onChange={e => setNewUserRole(e.target.value)}
+                            className="form-input"
+                            required
+                        >
+                            <option value="user">Utilizador</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <button type="submit" className="action-button add">
+                        <PlusCircle size={18} /> Adicionar
                     </button>
-                  </td>
-                </tr>
-                {expandedUserId === u.id && (
-                  <tr>
-                    <td colSpan="5">
-                      <div className="user-details-expanded">
-                        {editId === u.id ? (
-                          <form onSubmit={handleEdit} className="user-edit-form">
-                            <label>Nome:</label>
-                            <input
-                              type="text"
-                              value={editName}
-                              onChange={e => setEditName(e.target.value)}
-                              className="user-input"
-                              placeholder="Nome"
-                            />
-                            <label>Email:</label>
-                            <input
-                              type="email"
-                              value={editEmail}
-                              onChange={e => setEditEmail(e.target.value)}
-                              className="user-input"
-                              placeholder="Email"
-                            />
-                            <label>Role:</label>
-                            <select
-                              value={editRole}
-                              onChange={e => setEditRole(e.target.value)}
-                              className="user-input"
-                            >
-                              <option value="user">User</option>
-                              <option value="admin">Admin</option>
-                            </select>
-                            <button type="submit" className="user-btn save" title="Guardar">
-                              <Save size={18} />
-                            </button>
-                            <button type="button" className="user-btn cancel" onClick={() => setEditId(null)} title="Cancelar">
-                              <X size={18} />
-                            </button>
-                          </form>
-                        ) : (
-                          <div className="user-actions-details">
-                            {user?.role === 'admin' && (
-                              <div className="user-actions-row">
-                                <button
-                                  className="user-btn edit"
-                                  onClick={() => {
-                                    setEditId(u.id);
-                                    setEditName(u.name);
-                                    setEditEmail(u.email);
-                                    setEditRole(u.role);
-                                  }}
-                                  title="Editar Utilizador"
-                                >
-                                  <Edit size={18} />
-                                </button>
-                                <button className="user-btn delete" onClick={() => handleDelete(u.id)} title="Eliminar Utilizador">
-                                  <Trash2 size={18} />
-                                </button>
-                              </div>
-                            )}
+                </form>
+            )}
 
-                            <div className="user-info-lists">
-                                <div className="user-sub-section">
-                                    <h4>Médicos consultados:</h4>
-                                    {doctorsForExpandedUser.length === 0 ? (
-                                    <p>Nenhum médico consultado.</p>
-                                    ) : (
-                                    <ul className="doctors-list-inline">
-                                        {doctorsForExpandedUser.map(d => (
-                                        <li key={d.id}>{d.name}</li>
-                                        ))}
-                                    </ul>
-                                    )}
-                                </div>
+            <div className="card-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>Perfil</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {users.map(u => (
+                            <React.Fragment key={u.id}>
+                                <tr>
+                                    <td>{u.id}</td>
+                                    <td>
+                                        {editUserId === u.id ? (
+                                            <input
+                                                type="text"
+                                                value={editName}
+                                                onChange={e => setEditName(e.target.value)}
+                                                className="form-input small"
+                                            />
+                                        ) : u.name}
+                                    </td>
+                                    <td>
+                                        {editUserId === u.id ? (
+                                            <input
+                                                type="email"
+                                                value={editEmail}
+                                                onChange={e => setEditEmail(e.target.value)}
+                                                className="form-input small"
+                                                // Recomendado manter disabled={true} se o backend não permite a edição de email
+                                                // disabled={true}
+                                            />
+                                        ) : (u.email || 'N/A')}
+                                    </td>
+                                    <td>
+                                        {editUserId === u.id ? (
+                                            <select
+                                                value={editRole}
+                                                onChange={e => setEditRole(e.target.value)}
+                                                className="form-input small"
+                                                disabled={user?.role !== 'admin'} // Apenas admin pode alterar o role
+                                            >
+                                                <option value="user">Utilizador</option>
+                                                <option value="admin">Admin</option>
+                                            </select>
+                                        ) : (u.role || 'N/A')}
+                                    </td>
+                                    <td>
+                                        {editUserId === u.id ? (
+                                            <>
+                                                <button onClick={() => handleSaveEdit(u.id)} className="action-button save" title="Guardar">
+                                                    <Save size={18} />
+                                                </button>
+                                                <button onClick={() => setEditUserId(null)} className="action-button cancel" title="Cancelar">
+                                                    <X size={18} />
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <button onClick={() => startEdit(u)} className="action-button edit" title="Editar">
+                                                    <Edit size={18} />
+                                                </button>
+                                                <button onClick={() => handleDeleteUser(u.id)} className="action-button delete" title="Eliminar">
+                                                    <Trash2 size={18} />
+                                                </button>
+                                                <button onClick={() => handleExpandUser(u.id)} className="action-button view" title="Ver Detalhes">
+                                                    <Eye size={18} />
+                                                </button>
+                                            </>
+                                        )}
+                                    </td>
+                                </tr>
+                                {expandedUserId === u.id && (
+                                    <tr>
+                                        <td colSpan="5">
+                                            <div className="user-details-expanded-area">
+                                                <h4>Detalhes para {u.name} ({u.email || 'Email Indisponível'}) - Perfil: {u.role || 'Indefinido'}</h4>
+                                                {userConsultasError && <div className="error-message">{userConsultasError}</div>}
+                                                <div className="user-details-cards-grid">
+                                                    <div className="card">
+                                                        <h5 className="card-title">Médicos consultados:</h5>
+                                                        {userDoctors.length > 0 ? (
+                                                            <div className="doctor-tags">
+                                                                {userDoctors.map(doc => (
+                                                                    <span key={doc.id} className="doctor-tag">{doc.name}</span>
+                                                                ))}
+                                                            </div>
+                                                        ) : (
+                                                            <p className="card-text">Nenhum médico consultado.</p>
+                                                        )}
+                                                    </div>
 
-                                <div className="user-sub-section">
-                                    <h4>Todas as Consultas:</h4>
-                                    {appointmentsForExpandedUser.length === 0 ? (
-                                    <p>Nenhuma consulta agendada.</p>
-                                    ) : (
-                                    <ul className="appointments-list-scroll">
-                                        {appointmentsForExpandedUser.map(a => (
-                                        <li key={a.id}>
-                                            {/* Corrigir exibição da data/hora */}
-                                            {a.data ? new Date(a.data).toLocaleString() : 'Data Inválida'} - {a.descricao} - {a.medico?.name} ({a.specialty?.name})
-                                        </li>
-                                        ))}
-                                    </ul>
-                                    )}
-                                    {/* MUDANÇA: BOTÃO REMOVIDO */}
-                                    {/* <button
-                                        className="user-btn view-all-consultas"
-                                        onClick={() => handleViewAllUserAppointmentsPage(u.id, u.name)}
-                                        title="Ver todas as Consultas"
-                                    >
-                                        <Eye size={18} /> Ver todas as Consultas na página dedicada
-                                    </button> */}
-                                </div>
-
-                                <div className="user-sub-section">
-                                    <h4>Consultas por Especialidade:</h4>
-                                    <select
-                                    className="user-input"
-                                    value={selectedSpecialtyForAppointments}
-                                    onChange={e => {
-                                        setSelectedSpecialtyForAppointments(e.target.value);
-                                        handleFetchSpecAppointments(u.id, e.target.value);
-                                    }}
-                                    >
-                                    <option value="">Selecione uma Especialidade</option>
-                                    {specialties.map(s => (
-                                        <option key={s.id} value={s.id}>{s.name}</option>
-                                    ))}
-                                    </select>
-                                    {selectedSpecialtyForAppointments && (
-                                    specAppointmentsForExpandedUser.length === 0 ? (
-                                        <p>Nenhuma consulta encontrada para esta especialidade.</p>
-                                    ) : (
-                                        <ul className="appointments-list-scroll">
-                                        {specAppointmentsForExpandedUser.map(a => (
-                                            <li key={a.id}>
-                                            {/* Corrigir exibição da data/hora */}
-                                            {a.data ? new Date(a.data).toLocaleString() : 'Data Inválida'} - {a.descricao} - {a.medico?.name}
-                                            </li>
-                                        ))}
-                                        </ul>
-                                    )
-                                    )}
-                                </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </React.Fragment>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
+                                                    <div className="card">
+                                                        <h5 className="card-title">Consultas do Utilizador:</h5>
+                                                        <select
+                                                            value={selectedSpecialtyFilter}
+                                                            onChange={e => handleFilterConsultasBySpecialty(e.target.value)}
+                                                            className="form-input small"
+                                                            style={{ marginBottom: '10px' }}
+                                                        >
+                                                            <option value="">Todas as Especialidades</option>
+                                                            {specialtiesForFilter.map(s => (
+                                                                <option key={s.id} value={s.id}>{s.name}</option>
+                                                            ))}
+                                                        </select>
+                                                        {userConsultas.length > 0 ? (
+                                                            <ul className="consultas-list-small">
+                                                                {userConsultas.map(c => (
+                                                                    <li key={c.id} className="card-text small-text">
+                                                                        {c.dataDisplay} - {c.medicoName} ({c.specialtyName})
+                                                                    </li>
+                                                                ))}
+                                                            </ul>
+                                                        ) : (
+                                                            <p className="card-text">Nenhuma consulta encontrada para este utilizador (ou filtro).</p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )}
+                            </React.Fragment>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
 }
 
 export default UsersList;

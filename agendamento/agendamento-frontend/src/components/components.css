@@ -7,8 +7,7 @@
     justify-content: center;
     align-items: flex-start; /* Alinha ao topo para que o conteúdo não fique no centro vertical */
     min-height: 100vh; /* Garante que o contêiner ocupa a altura total da viewport */
-    /* background-color: #f0f2f5; /* Um cinza claro suave para o fundo */
-    padding: 20px; /* Espaçamento interno */
+    padding: 0 100px;
     box-sizing: border-box; /* Garante que padding não adicione largura/altura extra */
 }
 
@@ -22,9 +21,8 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sombra suave para profundidade */
     padding: 30px; /* Espaçamento interno maior */
     width: 100%;
-    /* max-width: 1200px; /* Largura máxima para tabelas grandes */
-    max-width: 90%;
-    margin: 20px; /* Margem externa */
+    max-width: 1500px; 
+    margin: 20px auto; 
 }
 
 /* -- Títulos -- */
@@ -109,11 +107,11 @@ h2 {
     gap: 8px; /* Espaço entre ícone e texto */
 }
 
-/* Cores dos botões */
+/* Cores dos botões (preenchidos com texto) */
 .medico-btn.add,
 .consulta-btn.add,
 .user-btn.add,
-.especialidade-btn.add {
+.especialidade-btn.add { /* Adicionar (manter preenchido) */
     background-color: #28a745; /* Verde para adicionar */
     color: white;
 }
@@ -126,69 +124,89 @@ h2 {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.medico-btn.edit,
-.consulta-btn.edit,
-.user-btn.edit,
-.especialidade-btn.edit {
-    background-color: #007bff; /* Azul para editar */
-    color: white;
-}
-.medico-btn.edit:hover,
-.consulta-btn.edit:hover,
-.user-btn.edit:hover,
-.especialidade-btn.edit:hover {
-    background-color: #0056b3;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.medico-btn.delete,
-.consulta-btn.delete,
-.user-btn.delete,
-.especialidade-btn.delete {
-    background-color: #dc3545; /* Vermelho para eliminar */
-    color: white;
-}
-.medico-btn.delete:hover,
-.consulta-btn.delete:hover,
-.user-btn.delete:hover,
-.especialidade-btn.delete:hover {
-    background-color: #c82333;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.medico-btn.save,
-.consulta-btn.save,
-.user-btn.save,
-.especialidade-btn.save {
-    background-color: #17a2b8; /* Azul claro para salvar */
-    color: white;
-}
-.medico-btn.save:hover,
-.consulta-btn.save:hover,
-.user-btn.save:hover,
-.especialidade-btn.save:hover {
-    background-color: #138496;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.medico-btn.cancel,
-.consulta-btn.cancel,
-.user-btn.cancel,
+/* A PARTIR DAQUI: ESTILOS PARA OS BOTÕES COM APENAS ÍCONE */
+/* ESTILO GERAL PARA BOTÕES DE ÍCONE (PARA ESPECIALIDADES E UTILIZADORES) */
+/* Crie uma classe comum ou use seletores compostos para aplicar a ambos */
+.action-button, /* Para os botões de ícone do UsersList */
+.especialidade-btn.edit,
+.especialidade-btn.delete,
+.especialidade-btn.save,
 .especialidade-btn.cancel {
-    background-color: #6c757d; /* Cinza para cancelar */
-    color: white;
+    background: none; /* Fundo transparente */
+    border: 1px solid transparent; /* Borda transparente por padrão, a cor será definida abaixo */
+    padding: 8px; /* Padding ajustado para o ícone */
+    border-radius: 50%; /* Torna o botão redondo */
+    width: 36px; /* Define largura e altura para ser um quadrado perfeito antes do border-radius */
+    height: 36px;
+    display: inline-flex; /* Garante que o ícone esteja centralizado */
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0; /* Evita que o botão encolha em layouts flex */
+    box-sizing: border-box; /* Inclui padding e border no tamanho total */
+    font-size: 0; /* Oculta qualquer texto remanescente, só o ícone aparece */
+    cursor: pointer;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    /* Remover transform e box-shadow padrão para um look mais flat para ícones */
+    transform: none;
+    box-shadow: none;
 }
-.medico-btn.cancel:hover,
-.consulta-btn.cancel:hover,
-.user-btn.cancel:hover,
+
+/* Cores e Hover para os botões de Ícone */
+
+/* Botão de Editar (Ícone) */
+.action-button.edit,
+.especialidade-btn.edit {
+    border-color: #007bff; /* Borda azul */
+    color: #007bff; /* Cor do ícone azul */
+}
+.action-button.edit:hover,
+.especialidade-btn.edit:hover {
+    background-color: #e7f4ff; /* Fundo azul claro ao passar o mouse */
+    color: #0056b3;
+    border-color: #0056b3;
+}
+
+/* Botão de Eliminar (Ícone) */
+.action-button.delete,
+.especialidade-btn.delete {
+    border-color: #dc3545; /* Borda vermelha */
+    color: #dc3545; /* Cor do ícone vermelho */
+}
+.action-button.delete:hover,
+.especialidade-btn.delete:hover {
+    background-color: #fce7e9; /* Fundo vermelho claro ao passar o mouse */
+    color: #c82333;
+    border-color: #c82333;
+}
+
+/* Botão de Salvar (Ícone) */
+.action-button.save,
+.especialidade-btn.save {
+    border-color: #28a745; /* Borda verde (usei o verde de 'add' para consistência visual de 'sucesso') */
+    color: #28a745; /* Cor do ícone verde */
+}
+.action-button.save:hover,
+.especialidade-btn.save:hover {
+    background-color: #e6ffe6;
+    color: #218838;
+    border-color: #218838;
+}
+
+/* Botão de Cancelar (Ícone) */
+.action-button.cancel,
+.especialidade-btn.cancel {
+    border-color: #6c757d; /* Borda cinza */
+    color: #6c757d; /* Cor do ícone cinza */
+}
+.action-button.cancel:hover,
 .especialidade-btn.cancel:hover {
-    background-color: #5a6268;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    background-color: #f2f3f5;
+    color: #5a6268;
+    border-color: #5a6268;
 }
+
+/* FIM DOS ESTILOS DE BOTÃO DE ÍCONE */
+
 
 /* -- Botão "Consultas" em MedicosList -- */
 .medico-btn.consultas {
@@ -202,7 +220,9 @@ h2 {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-/* Novo estilo para o botão de "Ver Detalhes" em EspecialidadesList */
+/* Novo estilo para o botão de "Ver Detalhes" em EspecialidadesList (se tiver um) */
+/* Pelo seu código, o "Eye" é no header, não um botão separado */
+/* Se quiser um botão 'view-details' separado, pode usar este estilo */
 .especialidade-btn.view-details {
     background: none;
     border: 1px solid #007bff;
@@ -226,45 +246,58 @@ h2 {
 /* -- Tabelas (para Medicos, Consultas, Users) -- */
 table {
     width: 100%;
-    border-collapse: collapse; /* Remove espaçamento entre células */
+    border-collapse: collapse;
     margin-top: 20px;
     background-color: #fff;
     border-radius: 8px;
-    overflow: hidden; /* Garante que cantos arredondados sejam aplicados corretamente */
+    overflow: hidden;
 }
 
 thead th {
-    background-color: #007bff; /* Azul para o cabeçalho da tabela */
+    background-color: #007bff;
     color: white;
-    padding: 15px;
+    padding: 15px; /* Manter este padding para o cabeçalho */
     text-align: left;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     font-size: 0.9em;
+    /* Adicionar box-sizing para garantir consistência */
+    box-sizing: border-box;
 }
 
 tbody tr {
-    border-bottom: 1px solid #eee; /* Linhas divisórias suaves */
+    border-bottom: 1px solid #eee;
     transition: background-color 0.2s ease;
 }
 
 tbody tr:last-child {
-    border-bottom: none; /* Remove a linha de baixo da última linha */
+    border-bottom: none;
 }
 
 tbody tr:hover {
-    background-color: #f5f5f5; /* Efeito de hover nas linhas */
+    background-color: #f5f5f5;
 }
 
 tbody td {
-    padding: 15px;
+    padding: 15px; /* Manter este padding para células de texto normal */
     vertical-align: middle;
     color: #555;
+    /* Adicionar box-sizing para garantir consistência */
+    box-sizing: border-box;
 }
 
+/* Ajuste específico para células que contêm inputs em modo de edição */
+/* Se a célula contém um input, podemos ajustar o seu padding para que o input
+   preencha melhor o espaço e o conteúdo se alinhe */
+tbody td:has(.user-input) { /* Usa :has() se o navegador suportar, ou uma classe no HTML */
+    padding: 8px 15px; /* Um pouco menos de padding vertical para acomodar o input */
+    /* Mantenha o padding horizontal (15px) igual ao do <th> */
+}
+
+
 tbody td button {
-    margin-right: 8px; /* Espaçamento entre botões na tabela */
+    margin-right: 8px;
 }
 tbody td button:last-child {
     margin-right: 0;
@@ -274,10 +307,28 @@ tbody td button:last-child {
 tbody td .medico-input,
 tbody td .consulta-input,
 tbody td .user-input {
-    width: calc(100% - 10px); /* Ajuste para não transbordar */
-    padding: 8px 10px;
+    width: calc(100% - 2px); /* Alterado: 100% menos 2px (para a borda do input) */
+    padding: 8px 10px; /* Padding interno do input */
     font-size: 0.95rem;
-    margin-bottom: 5px; /* Espaçamento entre inputs e botões de editar/salvar */
+    margin: 0; /* Remover qualquer margem padrão do input */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; /* Fundamental: inclui padding e border na largura */
+    vertical-align: middle; /* Ajuda no alinhamento vertical dentro da célula */
+}
+
+/* Se precisar de um input menor para botões (como você tem no UsersList.js para editName) */
+/* Adicione esta regra se 'form-input small' for a classe do input dentro da célula da tabela */
+.form-input.small {
+    width: calc(100% - 2px); /* Tenta preencher 100% da célula, subtraindo a borda */
+    padding: 6px 8px; /* Padding menor para caber na célula */
+    margin: 0; /* Remove margens extras */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; /* Crucial para o alinhamento: inclui padding e border na largura */
+    font-size: inherit; /* Herda o tamanho da fonte da célula pai */
+    line-height: normal; /* Garante que a altura da linha não afete */
+    vertical-align: middle; /* Ajuda a alinhar o input verticalmente no meio da célula */
 }
 
 /* -- EspecialidadesList - Estilos Específicos -- */
@@ -313,6 +364,7 @@ tbody td .user-input {
     font-size: 1.1em;
     font-weight: 500;
     color: #333;
+    padding: 0; /* Remover padding aqui e deixar apenas no .especialidade-item se necessário */
     /* transition: background-color 0.2s ease; */ /* Opcional: efeito hover no header */
 }
 
@@ -326,14 +378,19 @@ tbody td .user-input {
     margin-top: 15px;
     padding-top: 15px;
     border-top: 1px dashed #ddd; /* Linha tracejada para separar o header dos detalhes */
+    /* Removido padding-left: 12px; para usar o gap do flexbox no especialidade-actions-row */
+    padding-left: 0; /* Reset para não ter indentação extra aqui */
+    padding-right: 0;
 }
 
 /* Linha de botões de ação dentro dos detalhes (Editar, Eliminar) */
 .especialidade-actions-row {
     display: flex;
-    gap: 10px;
+    gap: 10px; /* Espaçamento entre os botões */
     margin-top: 10px;
-    justify-content: flex-end; /* Alinha os botões à direita */
+    justify-content: flex-start; /* Alinha os botões à esquerda (como nos utilizadores) */
+    align-items: center; /* Alinha verticalmente */
+    margin-bottom: 10px; /* Espaço abaixo dos botões de ação */
 }
 
 /* Estilo para a lista de médicos dentro dos detalhes da especialidade */

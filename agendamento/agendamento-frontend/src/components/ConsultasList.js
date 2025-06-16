@@ -12,40 +12,60 @@ function ConsultasList({ user, token, showMessage }) {
   const [editDescricao, setEditDescricao] = useState('');
   const [editMedico, setEditMedico] = useState('');
   const [editEspecialidade, setEditEspecialidade] = useState('');
-  const [editPaciente, setEditPaciente] = useState(''); // NOVO: Estado para o ID do paciente selecionado na edição
+  const [editPaciente, setEditPaciente] = useState('');
 
   const [medicos, setMedicos] = useState([]);
   const [especialidades, setEspecialidades] = useState([]);
-  const [pacientes, setPacientes] = useState([]); // NOVO: Lista de pacientes para o select
+  const [pacientes, setPacientes] = useState([]);
 
   // Estados para adicionar nova consulta
   const [newData, setNewData] = useState('');
   const [newDescricao, setNewDescricao] = useState('');
   const [newMedico, setNewMedico] = useState('');
   const [newEspecialidade, setNewEspecialidade] = useState('');
-  const [newPaciente, setNewPaciente] = useState(''); // NOVO: Estado para o ID do paciente ao adicionar (para admin)
+  const [newPaciente, setNewPaciente] = useState('');
 
+  // *** NOVO: Estados para os filtros ***
+  const [filterEspecialidade, setFilterEspecialidade] = useState('');
+  const [filterMedico, setFilterMedico] = useState('');
 
+  // UseEffect para carregar dados iniciais e re-carregar em mudanças de token/filtros
   useEffect(() => {
     fetchConsultas();
     fetchMedicos();
     fetchEspecialidades();
-    fetchPacientes(); // NOVO: Carregar pacientes ao montar o componente
+    fetchPacientes();
     // eslint-disable-next-line
-  }, []);
+  }, [token, filterEspecialidade, filterMedico]); // Dependências para re-fetch com filtros
 
   const fetchConsultas = () => {
     setLoading(true);
-    api.get('/appointments', {
+    setErro(''); // Limpa erro antes de nova busca
+    let url = '/appointments';
+    const params = new URLSearchParams();
+
+    // *** NOVO: Adiciona filtros aos parâmetros da URL ***
+    if (filterEspecialidade) {
+        params.append('specialtyId', filterEspecialidade);
+    }
+    if (filterMedico) {
+        params.append('medicoId', filterMedico);
+    }
+
+    if (params.toString()) {
+        url += `?${params.toString()}`;
+    }
+
+    api.get(url, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => {
         setConsultas(res.data);
         setLoading(false);
-        setErro(''); // Limpa erro se a busca for bem-sucedida
       })
-      .catch(() => {
-        setErro('Erro ao carregar consultas');
+      .catch((err) => {
+        console.error("Erro ao carregar consultas:", err);
+        setErro('Erro ao carregar consultas. ' + (err.response?.data?.error || ''));
         setLoading(false);
       });
   };
@@ -66,26 +86,21 @@ function ConsultasList({ user, token, showMessage }) {
       .catch(err => console.error('Erro ao carregar especialidades:', err));
   };
 
-  // NOVO: Função para buscar pacientes
   const fetchPacientes = () => {
-    api.get('/users', { // Supondo que você tem um endpoint /users que retorna todos os usuários/pacientes
+    api.get('/users', {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => {
-        // Filtra apenas usuários com role 'user' se aplicável, ou ajuste conforme a sua lógica de roles
-        const pacientesData = res.data.filter(u => u.role === 'user'); // Assumindo que pacientes têm role 'user'
+        const pacientesData = res.data.filter(u => u.role === 'user');
         setPacientes(pacientesData);
       })
       .catch(err => console.error('Erro ao carregar pacientes:', err));
   };
 
-  // Adicionar consulta
   const handleAdd = (e) => {
     e.preventDefault();
-
-    // Validação básica
     if (!newData || !newMedico || !newEspecialidade || (user?.role === 'admin' && !newPaciente)) {
-        showMessage && showMessage('Preencha todos os campos obrigatórios.', 'warning');
+        showMessage && showMessage('Preencha todos os campos obrigatórios para adicionar.', 'warning');
         return;
     }
 
@@ -96,7 +111,6 @@ function ConsultasList({ user, token, showMessage }) {
         descricao: newDescricao
     };
 
-    // Adiciona pacienteId ao payload APENAS se for admin e um paciente foi selecionado
     if (user?.role === 'admin' && newPaciente) {
         payload.pacienteId = Number(newPaciente);
     }
@@ -105,13 +119,12 @@ function ConsultasList({ user, token, showMessage }) {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(() => {
-        // Limpar estados do formulário após adição
         setNewData('');
         setNewDescricao('');
         setNewMedico('');
         setNewEspecialidade('');
-        setNewPaciente(''); // Limpar também o estado do paciente
-        fetchConsultas(); // Recarrega a lista para mostrar a nova consulta
+        setNewPaciente('');
+        fetchConsultas();
         showMessage && showMessage('Consulta adicionada com sucesso!', 'success');
       })
       .catch(err => {
@@ -119,11 +132,8 @@ function ConsultasList({ user, token, showMessage }) {
       });
   };
 
-  // Editar consulta
   const handleEdit = (e) => {
     e.preventDefault();
-
-    // Validação básica
     if (!editData || !editMedico || !editEspecialidade || (user?.role === 'admin' && !editPaciente)) {
       showMessage && showMessage('Preencha todos os campos obrigatórios para edição.', 'warning');
       return;
@@ -136,7 +146,6 @@ function ConsultasList({ user, token, showMessage }) {
       descricao: editDescricao
     };
 
-    // Adiciona pacienteId ao payload APENAS se for admin e um paciente foi selecionado
     if (user?.role === 'admin' && editPaciente) {
         payload.pacienteId = Number(editPaciente);
     }
@@ -145,14 +154,13 @@ function ConsultasList({ user, token, showMessage }) {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(() => {
-        // Limpar estados do formulário de edição
         setEditId(null);
         setEditData('');
         setEditDescricao('');
         setEditMedico('');
         setEditEspecialidade('');
-        setEditPaciente(''); // Limpar o estado do paciente de edição
-        fetchConsultas(); // Recarrega a lista para mostrar as alterações
+        setEditPaciente('');
+        fetchConsultas();
         showMessage && showMessage('Consulta atualizada com sucesso!', 'success');
       })
       .catch(err => {
@@ -160,14 +168,13 @@ function ConsultasList({ user, token, showMessage }) {
       });
   };
 
-  // Eliminar consulta
   const handleDelete = (id) => {
     if (!window.confirm('Tem certeza que deseja eliminar esta consulta?')) return;
     api.delete(`/appointments/${id}`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(() => {
-        fetchConsultas(); // Recarrega a lista
+        fetchConsultas();
         showMessage && showMessage('Consulta eliminada com sucesso!', 'success');
       })
       .catch(err => {
@@ -175,12 +182,10 @@ function ConsultasList({ user, token, showMessage }) {
       });
   };
 
-  // Funções para formatar data e hora
   const formatDateTimeForInput = (isoString) => {
     if (!isoString) return '';
     try {
         const date = new Date(isoString);
-        // Formato 'YYYY-MM-DDTHH:MM' para input type="datetime-local"
         const year = date.getFullYear();
         const month = (date.getMonth() + 1).toString().padStart(2, '0');
         const day = date.getDate().toString().padStart(2, '0');
@@ -196,7 +201,11 @@ function ConsultasList({ user, token, showMessage }) {
   const formatDateTimeForDisplay = (isoString) => {
     if (!isoString) return '';
     try {
-        return new Date(isoString).toLocaleString('pt-PT', {
+        // Converte para um objeto Date. Se a string já estiver em UTC (com 'Z'), será tratada como tal.
+        // Se for uma string local sem 'Z', Date() a tratará como local.
+        const date = new Date(isoString);
+        // Garante que a data seja formatada para o fuso horário local do usuário, com 24h.
+        return date.toLocaleString('pt-PT', {
             year: 'numeric',
             month: '2-digit',
             day: '2-digit',
@@ -220,7 +229,7 @@ function ConsultasList({ user, token, showMessage }) {
         <h2>Consultas</h2>
 
         {/* Formulário para adicionar consulta (Visível apenas para admins, ou pode ajustar) */}
-        {user?.role === 'admin' && ( // Adicionado condição para admin para este formulário completo
+        {user?.role === 'admin' && (
             <form onSubmit={handleAdd} className="consulta-form">
                 <h3>Adicionar Nova Consulta</h3>
                 <input
@@ -234,7 +243,7 @@ function ConsultasList({ user, token, showMessage }) {
                     value={newEspecialidade}
                     onChange={e => {
                         setNewEspecialidade(e.target.value);
-                        setNewMedico(''); // Limpa o médico quando a especialidade muda
+                        setNewMedico('');
                     }}
                     className="consulta-input"
                     required
@@ -257,7 +266,6 @@ function ConsultasList({ user, token, showMessage }) {
                             <option key={m.id} value={m.id}>{m.name}</option>
                         ))}
                 </select>
-                {/* NOVO: Select para Paciente ao adicionar (apenas para admin) */}
                 <select
                     value={newPaciente}
                     onChange={e => setNewPaciente(e.target.value)}
@@ -280,6 +288,43 @@ function ConsultasList({ user, token, showMessage }) {
             </form>
         )}
 
+        {/* *** NOVO: Filtros para a tabela de consultas *** */}
+        <div className="consulta-filters">
+            <h3>Filtrar Consultas</h3>
+            <select
+                value={filterEspecialidade}
+                onChange={e => {
+                    setFilterEspecialidade(e.target.value);
+                    setFilterMedico(''); // Reseta médico quando especialidade muda
+                }}
+                className="consulta-input"
+            >
+                <option value="">Todas as Especialidades</option>
+                {especialidades.map(s => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+            </select>
+            <select
+                value={filterMedico}
+                onChange={e => setFilterMedico(e.target.value)}
+                className="consulta-input"
+            >
+                <option value="">Todos os Médicos</option>
+                {medicos
+                    .filter(m => !filterEspecialidade || m.specialty?.id === Number(filterEspecialidade))
+                    .map(m => (
+                        <option key={m.id} value={m.id}>{m.name}</option>
+                    ))}
+            </select>
+            {/* Um botão para limpar os filtros pode ser útil */}
+            {(filterEspecialidade || filterMedico) && (
+                <button onClick={() => { setFilterEspecialidade(''); setFilterMedico(''); }} className="consulta-btn cancel" style={{ marginLeft: '10px' }}>
+                    Limpar Filtros
+                </button>
+            )}
+        </div>
+
+
         <table>
           <thead>
             <tr>
@@ -288,7 +333,7 @@ function ConsultasList({ user, token, showMessage }) {
               <th>Especialidade</th>
               <th>Médico</th>
               <th>Descrição</th>
-              <th>Paciente</th> {/* NOVO: Cabeçalho da coluna Paciente */}
+              <th>Paciente</th>
               <th>Ações</th>
             </tr>
           </thead>
@@ -314,7 +359,7 @@ function ConsultasList({ user, token, showMessage }) {
                       value={editEspecialidade}
                       onChange={e => {
                           setEditEspecialidade(e.target.value);
-                          setEditMedico(''); // Limpa o médico se a especialidade de edição mudar
+                          setEditMedico('');
                       }}
                       className="consulta-input"
                     >
@@ -358,9 +403,8 @@ function ConsultasList({ user, token, showMessage }) {
                     c.descricao
                   )}
                 </td>
-                {/* Célula do Paciente - visível durante a exibição e, se admin, pode ter um select */}
                 <td>
-                  {editId === c.id && user?.role === 'admin' ? ( // Se está em edição E é admin, mostra o select
+                  {editId === c.id && user?.role === 'admin' ? (
                     <select
                       value={editPaciente}
                       onChange={e => setEditPaciente(e.target.value)}
@@ -372,7 +416,7 @@ function ConsultasList({ user, token, showMessage }) {
                         <option key={p.id} value={p.id}>{p.name}</option>
                       ))}
                     </select>
-                  ) : ( // Caso contrário (não está em edição ou não é admin), apenas exibe o nome
+                  ) : (
                     c.paciente ? c.paciente.name : 'N/A'
                   )}
                 </td>
@@ -390,12 +434,12 @@ function ConsultasList({ user, token, showMessage }) {
                     <>
                       <button className="consulta-btn edit" onClick={() => {
                         setEditId(c.id);
-                        // Formata a data para o input datetime-local
                         setEditData(formatDateTimeForInput(c.data));
                         setEditDescricao(c.descricao || '');
-                        setEditEspecialidade(c.specialty?.id || '');
-                        setEditMedico(c.medico?.id || '');
-                        setEditPaciente(c.paciente?.id || ''); // NOVO: Inicializa o estado do paciente para edição
+                        // Certifica-se de que os IDs são strings para o select value
+                        setEditEspecialidade(c.specialty?.id?.toString() || '');
+                        setEditMedico(c.medico?.id?.toString() || '');
+                        setEditPaciente(c.paciente?.id?.toString() || '');
                       }} title="Editar">
                         <Edit size={18} />
                       </button>
