@@ -15,6 +15,7 @@ function UsersList({ user, token, showMessage }) {
     const [expandedUserDetails, setExpandedUserDetails] = useState(null);
     const [userConsultas, setUserConsultas] = useState([]);
     const [userDoctors, setUserDoctors] = useState([]);
+
     const [userConsultasError, setUserConsultasError] = useState('');
     const [specialtiesForFilter, setSpecialtiesForFilter] = useState([]);
     const [selectedSpecialtyFilter, setSelectedSpecialtyFilter] = useState('');
