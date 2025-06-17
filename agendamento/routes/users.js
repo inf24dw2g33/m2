@@ -3,6 +3,13 @@ const router = express.Router();
 const auth = require('../middleware/auth'); // Assumindo que este middleware verifica autenticação e adiciona user à requisição
 const { User, Appointment, Doctor, Specialty } = require('../models'); // Importa o modelo User
 
+// Exemplo esperado no backend (users.js ou semelhante):
+router.get('/me', auth, async (req, res) => {
+  const user = await User.findByPk(req.user.id);
+  if (!user) return res.status(404).json({ error: 'Utilizador não encontrado' });
+  res.json(user);
+});
+
 // Middleware de verificação de admin (aplicado a todas as rotas abaixo)
 router.use(auth, (req, res, next) => {
   if (req.user.role !== 'admin') {
@@ -24,18 +31,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.get('/me', auth, (req, res) => {
-  // req.user deve ser preenchido pelo middleware auth
-  if (!req.user) {
-    return res.status(401).json({ error: 'Não autenticado.' });
-  }
-  res.json({
-    id: req.user.id,
-    name: req.user.name,
-    email: req.user.email,
-    role: req.user.role
-  });
-});
 
 // POST /users - Cria um novo utilizador
 router.post('/', async (req, res) => {

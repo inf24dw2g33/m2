@@ -283,7 +283,7 @@ function UsersList({ user, token, showMessage }) {
             {user?.role === 'admin' && (
                 <form onSubmit={handleAddUser} className="form-container" style={{ marginBottom: '20px' }}>
                     <h3 className="form-section-title">Adicionar Novo Utilizador</h3>
-                    <p className="form-info-text">Preencha os campos para adicionar um novo utilizador. Note que o campo 'Google ID' é opcional.</p>
+                    <p className="form-info-text">Preencha os campos para adicionar um novo utilizador.</p>
                     <div className="form-row">
                         <input
                             type="text"
@@ -305,7 +305,7 @@ function UsersList({ user, token, showMessage }) {
                     <div className="form-row">
                         <input
                             type="text"
-                            placeholder="Google ID (Opcional)"
+                            placeholder="Google ID"
                             value={newUserGoogleId}
                             onChange={e => setNewUserGoogleId(e.target.value)}
                             className="form-input"

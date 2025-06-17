@@ -108,23 +108,23 @@ body {
 }
 
 .logout-button {
-    background-color: #f44336; /* Vermelho para sair */
+    background-color: black; /* Vermelho para sair */
     padding: 8px 15px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .logout-button:hover {
-    background-color: #d32f2f;
+    background-color: black;
 }
 
 .login-button {
-    background-color: #557dd4; /* Azul para login */
+    background-color: black;
     padding: 8px 15px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .login-button:hover {
-    background-color: #0e57f3;
+    background-color: black;
 }
 
 /* Estilos para o HomeView */

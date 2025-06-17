@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Trash2, Edit, Save, X, Eye } from 'lucide-react'; // Certifique-se que Save e X estão importados!
+import { Trash2, Edit, Save, X, Eye, PlusCircle } from 'lucide-react'; // Added PlusCircle
 import './components.css';
 import api from '../api/api';
 
@@ -8,7 +8,7 @@ function EspecialidadesList({ user, showMessage, token }) {
     const [specialties, setSpecialties] = useState([]);
     const [expandedId, setExpandedId] = useState(null);
     const [doctors, setDoctors] = useState([]);
-    const [erro, setErro] = useState('');
+    const [error, setError] = useState(''); // Changed from 'erro' to 'error' for consistency
     const [loading, setLoading] = useState(true);
 
     // Estados para adicionar/editar
@@ -31,10 +31,10 @@ function EspecialidadesList({ user, showMessage, token }) {
                 const sorted = res.data.sort((a, b) => a.name.localeCompare(b.name));
                 setSpecialties(sorted);
                 setLoading(false);
-                setErro('');
+                setError('');
             })
             .catch(() => {
-                setErro('Erro ao carregar especialidades');
+                setError('Erro ao carregar especialidades');
                 setLoading(false);
             });
     };
@@ -42,7 +42,7 @@ function EspecialidadesList({ user, showMessage, token }) {
     // Consulta médicos da especialidade
     const fetchDoctors = (id) => {
         setDoctors([]);
-        setErro('');
+        setError(''); // Limpa o erro anterior antes de uma nova busca
         // Usa o token recebido via props
         api.get(`/specialties/${id}`, {
             headers: { Authorization: `Bearer ${token}` }
@@ -52,7 +52,7 @@ function EspecialidadesList({ user, showMessage, token }) {
             })
             .catch((err) => {
                 console.error("Erro ao carregar médicos da especialidade:", err);
-                setErro('Erro ao carregar médicos desta especialidade.');
+                setError('Erro ao carregar médicos desta especialidade.');
             });
     };
 
@@ -78,8 +78,8 @@ function EspecialidadesList({ user, showMessage, token }) {
     };
 
     // Editar especialidade
-    const handleEdit = (e) => {
-        e.preventDefault();
+    const handleSaveEdit = (e) => { // Renamed from handleEdit to handleSaveEdit for consistency
+        e.preventDefault(); // Prevent default form submission if it's a form
         if (!editName.trim()) {
             showMessage && showMessage('Nome da especialidade não pode ser vazio.', 'warning');
             return;
@@ -109,6 +109,10 @@ function EspecialidadesList({ user, showMessage, token }) {
             .then(() => {
                 fetchSpecialties();
                 showMessage && showMessage('Especialidade eliminada!', 'success');
+                if (expandedId === id) { // Close expanded section if deleted
+                    setExpandedId(null);
+                    setDoctors([]);
+                }
             })
             .catch(err => {
                 showMessage && showMessage(err.response?.data?.error || 'Erro ao eliminar especialidade.', 'error');
@@ -120,117 +124,128 @@ function EspecialidadesList({ user, showMessage, token }) {
         if (expandedId === id) {
             setExpandedId(null);
             setDoctors([]);
-            setErro(''); // Limpa o erro ao fechar
+            setError(''); // Limpa o erro ao fechar
         } else {
             setExpandedId(id);
             fetchDoctors(id);
         }
     };
 
-    if (loading) return <div className="especialidades-container"><div className="especialidades-card">A carregar especialidades...</div></div>;
+    // Function to start editing
+    const startEdit = (specialtyToEdit) => {
+        setEditId(specialtyToEdit.id);
+        setEditName(specialtyToEdit.name);
+    };
+
+
+    if (loading) return <div className="list-container"><div className="loading-message">A carregar especialidades...</div></div>;
+    if (error && !specialties.length) return <div className="list-container"><div className="error-message">{error}</div></div>;
+
 
     return (
-        <div className="especialidades-container">
-            <div className="especialidades-card">
-                <h2>Especialidades</h2>
+        <div className="list-container">
+            <h2 className="list-title">Gestão de Especialidades</h2>
 
-                {/* Formulário para adicionar (apenas admin) */}
-                {user?.role === 'admin' && (
-                    <form onSubmit={handleAdd} className="especialidade-form">
+            {/* Formulário para adicionar (apenas admin) */}
+            {user?.role === 'admin' && (
+                <form onSubmit={handleAdd} className="form-container" style={{ marginBottom: '20px' }}>
+                    <h3 className="form-section-title">Adicionar Nova Especialidade</h3>
+                    <div className="form-row">
                         <input
                             type="text"
-                            placeholder="Nova especialidade"
+                            placeholder="Nome da Especialidade"
                             value={newName}
                             onChange={e => setNewName(e.target.value)}
-                            className="especialidade-input"
+                            className="form-input"
+                            required
                         />
-                        <button type="submit" className="especialidade-btn add">Adicionar</button>
-                    </form>
-                )}
+                    </div>
+                    <button type="submit" className="action-button add">
+                        <PlusCircle size={18} /> Adicionar
+                    </button>
+                </form>
+            )}
 
-                {erro && <div className="error-message">{erro}</div>}
+            {error && specialties.length > 0 && <div className="error-message">{error}</div>} {/* Show error if there's data but also an error */}
 
-                <ul className="especialidades-list">
-                    {specialties.map(spec => (
-                        <li key={spec.id} className="especialidade-item"> {/* Alterado de especialidade-link-item para especialidade-item */}
-                            <div className="especialidade-header" onClick={() => handleExpand(spec.id)}> {/* Envolve o nome e o ícone de expandir/contrair */}
-                                <button
-                                    className="especialidade-link"
-                                    style={{
-                                        background: 'none',
-                                        border: 'none',
-                                        color: '#1976d2',
-                                        textDecoration: 'underline',
-                                        cursor: 'pointer',
-                                        fontSize: '1.1rem',
-                                        padding: 0,
-                                        marginBottom: 4
-                                    }}
-                                >
-                                    {spec.name}
-                                </button>
-                                {/* Opcional: Adicione um ícone para indicar expandir/contrair */}
-                                {expandedId === spec.id ? <X size={20} /> : <Eye size={20} />}
-                            </div>
-
-                            {expandedId === spec.id && (
-                                <div className="especialidade-details"> {/* Classe já existente e bem definida */}
-                                    {editId === spec.id ? (
-                                        // Modo de Edição
-                                        <form onSubmit={handleEdit} className="especialidade-edit-form"> {/* Use especialidade-edit-form aqui */}
+            <div className="card-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {specialties.map(spec => (
+                            <React.Fragment key={spec.id}>
+                                <tr>
+                                    <td>{spec.id}</td>
+                                    <td>
+                                        {editId === spec.id ? (
                                             <input
                                                 type="text"
                                                 value={editName}
                                                 onChange={e => setEditName(e.target.value)}
-                                                className="especialidade-input"
+                                                className="form-input small"
                                             />
-                                            <button type="submit" className="especialidade-btn save" title="Guardar">
-                                                <Save size={18} /> {/* Ícone para Guardar */}
-                                            </button>
-                                            <button type="button" className="especialidade-btn cancel" onClick={() => setEditId(null)} title="Cancelar">
-                                                <X size={18} /> {/* Ícone para Cancelar */}
-                                            </button>
-                                        </form>
-                                    ) : (
-                                        // Modo de Visualização (dentro da área expandida)
-                                        <>
-                                            {user?.role === 'admin' && (
-                                                <div className="especialidade-actions-row"> {/* Div para alinhar os botões de ação */}
-                                                    <button
-                                                        className="especialidade-btn edit"
-                                                        onClick={() => { setEditId(spec.id); setEditName(spec.name); }}
-                                                        title="Editar"
-                                                    >
-                                                        <Edit size={18} /> {/* Ícone de Lápis */}
-                                                    </button>
-                                                    <button
-                                                        className="especialidade-btn delete"
-                                                        onClick={() => handleDelete(spec.id)}
-                                                        title="Eliminar"
-                                                    >
-                                                        <Trash2 size={18} /> {/* Ícone de Lixo */}
-                                                    </button>
-                                                </div>
-                                            )}
-                                            <div style={{ marginTop: 10 }}> {/* Este div pode ser estilizado no CSS */}
-                                                <strong>Médicos desta especialidade:</strong>
-                                                {doctors.length === 0 ? (
-                                                    erro ? <div className="error-message">{erro}</div> : <div className="sem-medicos">Sem médicos associados.</div>
-                                                ) : (
-                                                    <ul className="doctors-list-inline"> {/* Use a classe existente para médicos inline */}
+                                        ) : spec.name}
+                                    </td>
+                                    <td>
+                                        {editId === spec.id ? (
+                                            <>
+                                                <button onClick={handleSaveEdit} className="action-button save" title="Guardar">
+                                                    <Save size={18} />
+                                                </button>
+                                                <button onClick={() => setEditId(null)} className="action-button cancel" title="Cancelar">
+                                                    <X size={18} />
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                {user?.role === 'admin' && (
+                                                    <>
+                                                        <button onClick={() => startEdit(spec)} className="action-button edit" title="Editar">
+                                                            <Edit size={18} />
+                                                        </button>
+                                                        <button onClick={() => handleDelete(spec.id)} className="action-button delete" title="Eliminar">
+                                                            <Trash2 size={18} />
+                                                        </button>
+                                                    </>
+                                                )}
+                                                <button onClick={() => handleExpand(spec.id)} className="action-button view" title="Ver Médicos">
+                                                    <Eye size={18} />
+                                                </button>
+                                            </>
+                                        )}
+                                    </td>
+                                </tr>
+                                {expandedId === spec.id && (
+                                    <tr>
+                                        <td colSpan="3"> {/* span all 3 columns */}
+                                            <div className="medico-details-expanded-area"> {/* Re-using this class as it's general for expanded details */}
+                                                <h4>Médicos nesta especialidade:</h4>
+                                                {error && <div className="error-message">{error}</div>} {/* Show error specific to doctors fetch */}
+                                                {doctors.length > 0 ? (
+                                                    <ul className="consultas-list-small"> {/* Re-using this style for a scrollable list */}
                                                         {doctors.map(doc => (
-                                                            <li key={doc.id}>{doc.name}</li>
+                                                            <li key={doc.id} className="card-text small-text">
+                                                                {doc.name}
+                                                            </li>
                                                         ))}
                                                     </ul>
+                                                ) : (
+                                                    <p className="card-text">Nenhum médico associado a esta especialidade.</p>
                                                 )}
                                             </div>
-                                        </>
-                                    )}
-                                </div>
-                            )}
-                        </li>
-                    ))}
-                </ul>
+                                        </td>
+                                    </tr>
+                                )}
+                            </React.Fragment>
+                        ))}
+                    </tbody>
+                </table>
             </div>
         </div>
     );

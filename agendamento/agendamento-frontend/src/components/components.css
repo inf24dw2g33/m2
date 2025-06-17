@@ -1,4 +1,4 @@
-/* -- Contêineres Principais -- */
+/** -- Contêineres Principais -- */
 .medicos-container,
 .consultas-container,
 .users-container,
@@ -9,7 +9,7 @@
     min-height: 100vh; /* Garante que o contêiner ocupa a altura total da viewport */
     padding: 0 100px;
     box-sizing: border-box; /* Garante que padding não adicione largura/altura extra */
-}
+} 
 
 /* -- Contêineres de Listagem (para envolver o formulário e a tabela) -- */
 /* Esta é a classe principal que engloba tudo em cada lista (UsersList, MedicosList, ConsultasList) */
@@ -22,6 +22,16 @@
     padding: 20px 100px; /* Padding geral */
     box-sizing: border-box;
     width: 100%; /* Garante que o contêiner ocupe a largura total */
+}
+
+.especialidades-card { /* <--- ESSA É A CLASSE DO SEU CARD BRANCO */
+    background-color: #fff; /* Fundo branco para os cartões */
+    border-radius: 8px; /* Cantos arredondados */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sombra suave para profundidade */
+    padding: 30px; /* Espaçamento interno maior */
+    width: 100%;
+    max-width: 1500px; 
+    margin: 20px auto; 
 }
 
 /* -- Formulário de Adição (dentro da caixa branca) -- */
@@ -42,7 +52,7 @@
     color: #333;
     margin-top: 0;
     margin-bottom: 15px;
-    font-size: 1.5em;
+    font-size: 1rem;
 }
 
 .form-container .form-info-text {
@@ -104,7 +114,7 @@ h2 {
     padding: 12px 15px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    font-size: 1rem;
+    font-size: 0.9rem;
     color: #333;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
     box-sizing: border-box; /* Importante para o layout */
@@ -205,7 +215,7 @@ h2 {
     color: white;
     border-radius: 5px; /* Adicionar border-radius para consistência */
     padding: 10px 20px; /* Ajustar padding para botões com texto */
-    font-size: 1rem;
+    font-size: 0.9rem;
     width: fit-content; /* Ajusta largura ao conteúdo */
     /* Remover border e definir padding novamente para substituir o do .action-button genérico */
     border: none;
@@ -257,6 +267,7 @@ tbody td {
     vertical-align: middle;
     color: #555;
     box-sizing: border-box;
+    font-size: 0.9rem;
 }
 
 tbody td button {
