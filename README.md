@@ -31,6 +31,7 @@ Na pasta `/postmanCollection` encontra-se a **co[leção `.json`** com todos os 
 
 ## Galeria
 
+### Backend
 | Funcionalidade | Imagem |
 | --- | ----------- |
 | Login |  ![Login](/galeria/login1.png) |
@@ -38,6 +39,15 @@ Na pasta `/postmanCollection` encontra-se a **co[leção `.json`** com todos os 
 | Doctors |  ![Doctors](/galeria/doctors.png) |
 | Appointments |  ![Appointments](/galeria/appointments.png) |
 | Specialties |  ![Specialties](/galeria/specialties.png) |
+
+### Frontend
+| Funcionalidade | Imagem |
+| --- | ----------- |
+| Login |  ![Login](/galeria/frontend_login.png) |
+| Utilizadores |  ![Users](/galeria/frontend_utilizadores.png) |
+| Médicos |  ![Doctors](/galeria/frontend_medicos.png) |
+| Consultas |  ![Appointments](/galeria/frontend_consultas.png) |
+| Especialidades |  ![Specialties](/galeria/frontend_especialidades.png) |
 
 ## Tecnologias
 
