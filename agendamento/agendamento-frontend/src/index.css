@@ -10,7 +10,11 @@ body {
 /* Container principal da aplicação */
 .app-container {
     min-height: 100vh;
-    background-color: #b9b9b9; /* Cor de fundo para a área principal do app */
+    background-image: url('./imagem/fundo.jpg'); /* Imagem de fundo para a área principal do app */
+    background-size: cover; /* Cobre todo o espaço disponível */
+    background-position: center; /* Centraliza a imagem de fundo */
+    padding: 0; /* Remove padding para que a imagem de fundo cubra toda a área */
+    /*background-color: #b9b9b9; /* Cor de fundo para a área principal do app */
 }
 
 /* Área de conteúdo principal abaixo da navbar */
@@ -131,7 +135,10 @@ body {
 .home-view {
     padding: 40px;
     text-align: center;
-    background-color: rgb(163, 159, 159); /* Fundo do HomeView */
+    background-image: url('./imagem/fundo.jpg'); /* Fundo do HomeView */
+    background-size: cover; /* Cobre todo o espaço disponível */
+    background-position: center; /* Centraliza a imagem de fundo */
+    /*background-color: rgb(163, 159, 159); /* Fundo do HomeView */
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     border-radius: 10px;
     max-width: 800px;

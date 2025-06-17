@@ -22,7 +22,7 @@ router.use(auth, (req, res, next) => {
 router.get('/', async (req, res) => {
   try {
     const users = await User.findAll({
-      attributes: ['id', 'name'] // Seleciona apenas id e nome
+      attributes: ['id', 'name', 'role'] // Seleciona apenas id, nome e role
     });
     res.json(users);
   } catch (error) {
