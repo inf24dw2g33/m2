@@ -3,17 +3,24 @@ import { Edit, Trash2, Save, X, Eye, PlusCircle } from 'lucide-react';
 import './components.css';
 import api from '../api/api';
 
+const generateUUID = () => crypto.randomUUID();
+
 function UsersList({ user, token, showMessage }) {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
     const [editUserId, setEditUserId] = useState(null);
-    const [editName, setEditName] = useState('');
+    const [editUserName, setEditUserName] = useState('');
+    const [editUserEmail, setEditUserEmail] = useState('');
+    const [editUserRole, setEditUserRole] = useState('');
 
     const [expandedUserId, setExpandedUserId] = useState(null);
     const [expandedUserDetails, setExpandedUserDetails] = useState(null);
-    const [userConsultas, setUserConsultas] = useState([]);
+    
+    const [allUserConsultas, setAllUserConsultas] = useState([]);
+    const [filteredUserConsultas, setFilteredUserConsultas] = useState([]);
+    
     const [userDoctors, setUserDoctors] = useState([]);
 
     const [userConsultasError, setUserConsultasError] = useState('');
@@ -22,16 +29,31 @@ function UsersList({ user, token, showMessage }) {
 
     const [newUserName, setNewUserName] = useState('');
     const [newUserEmail, setNewUserEmail] = useState('');
-    const [newUserGoogleId, setNewUserGoogleId] = useState('');
+    //const [newUserPassword, setNewUserPassword] = useState('');
     const [newUserRole, setNewUserRole] = useState('user');
+
 
     useEffect(() => {
         fetchUsers();
         fetchSpecialtiesForFilter();
+        // eslint-disable-next-line
     }, [token]);
 
+    useEffect(() => {
+        if (selectedSpecialtyFilter && allUserConsultas.length > 0) {
+            const filtered = allUserConsultas.filter(consulta =>
+                consulta.medico?.specialty?.id === parseInt(selectedSpecialtyFilter)
+            );
+            setFilteredUserConsultas(filtered);
+        } else {
+            setFilteredUserConsultas(allUserConsultas);
+        }
+    }, [selectedSpecialtyFilter, allUserConsultas]);
+
+
     /**
-     * @brief Busca a lista de todos os utilizadores do backend.
+     * @brief Procura a lista de todos os utilizadores do backend.
+     * Assume que esta rota ( /users ) não traz email e role.
      * @param {void}
      * @returns {void}
      */
@@ -53,7 +75,26 @@ function UsersList({ user, token, showMessage }) {
     };
 
     /**
-     * @brief Busca a lista de especialidades para o filtro de consultas.
+     * @brief Procura os detalhes completos de um utilizador específico.
+     * Essencial para obter email e role se /users não os retornar.
+     * @param {string} userId - O ID do utilizador cujos detalhes serão Procurados.
+     * @returns {Promise<object|null>} Os detalhes do utilizador ou null em caso de erro.
+     */
+    const fetchUserDetails = async (userId) => {
+        try {
+            const response = await api.get(`/users/${userId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            return response.data;
+        } catch (err) {
+            console.error(`Erro ao carregar detalhes do utilizador ${userId}:`, err);
+            showMessage('Erro ao carregar detalhes do utilizador.', 'error');
+            return null;
+        }
+    };
+
+    /**
+     * @brief Procura a lista de especialidades para o filtro de consultas.
      * @param {void}
      * @returns {void}
      */
@@ -66,28 +107,21 @@ function UsersList({ user, token, showMessage }) {
     };
 
     /**
-     * @brief Busca os detalhes de um utilizador específico, suas consultas e médicos consultados.
-     * @param {string} userId - O ID do utilizador cujos detalhes serão buscados.
+     * @brief Procura as consultas de um utilizador específico.
+     * Separado para ser chamado por handleExpandUser.
+     * Inclui dados do médico e especialidade para o filtro.
+     * @param {string} userId - O ID do utilizador cujas consultas serão Procuradas.
      * @returns {Promise<void>}
      */
-    const fetchUserDetails = async (userId) => {
-        setUserConsultas([]);
-        setUserDoctors([]);
+    const fetchUserAppointments = async (userId) => {
+        setAllUserConsultas([]);
         setUserConsultasError('');
-
         try {
-            const userDetailsResponse = await api.get(`/users/${userId}`, {
+            const response = await api.get(`/users/${userId}/appointments`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            const fetchedUserDetail = userDetailsResponse.data;
-            setExpandedUserDetails(fetchedUserDetail);
 
-            const appointmentsResponse = await api.get(`/users/${userId}/appointments`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            const formattedConsultas = appointmentsResponse.data.map(c => {
-                // Combina c.date e c.time para criar um objeto Date válido.
-                // Assumindo que c.date é 'YYYY-MM-DD' e c.time é 'HH:MM:SS'
+            const formattedConsultas = response.data.map(c => {
                 const dateTimeString = `${c.date}T${c.time}`;
                 const dateObj = new Date(dateTimeString);
                 const dataDisplay = isNaN(dateObj.getTime()) ? 'Data Inválida' : dateObj.toLocaleString('pt-PT', {
@@ -98,25 +132,36 @@ function UsersList({ user, token, showMessage }) {
                 return {
                     ...c,
                     dataDisplay,
+                    pacienteName: c.paciente?.name || 'Paciente Desconhecido',
                     medicoName: c.medico?.name || 'Médico Desconhecido',
-                    specialtyName: c.medico?.specialty?.name || 'Especialidade Desconhecida'
+                    specialtyName: c.medico?.specialty?.name || 'Especialidade Desconhecida',
+                    specialtyId: c.medico?.specialty?.id
                 };
             });
-            setUserConsultas(formattedConsultas);
+            setAllUserConsultas(formattedConsultas);
+        } catch (err) {
+            console.error(`Erro ao carregar consultas para o utilizador ${userId}:`, err);
+            setUserConsultasError('Erro ao carregar consultas do utilizador. ' + (err.response?.data?.error || ''));
+        }
+    };
 
+    /**
+     * @brief Procura os médicos consultados por um utilizador específico.
+     * @param {string} userId - O ID do utilizador cujos médicos serão Procurados.
+     * @returns {Promise<void>}
+     */
+    const fetchUserDoctors = async (userId) => {
+        setUserDoctors([]);
+        try {
             const doctorsResponse = await api.get(`/users/${userId}/doctors`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setUserDoctors(doctorsResponse.data || []);
-
-            setSelectedSpecialtyFilter('');
-
         } catch (err) {
-            console.error(`Erro ao carregar detalhes para o usuário ${userId}:`, err);
-            setUserConsultasError('Erro ao carregar detalhes do utilizador. ' + (err.response?.data?.error || ''));
-            setExpandedUserDetails(null);
+            console.error(`Erro ao carregar médicos para o utilizador ${userId}:`, err);
         }
     };
+
 
     /**
      * @brief Alterna a exibição dos detalhes de um utilizador (expande/colapsa).
@@ -127,12 +172,21 @@ function UsersList({ user, token, showMessage }) {
         if (expandedUserId === userId) {
             setExpandedUserId(null);
             setExpandedUserDetails(null);
-            setUserConsultas([]);
+            setAllUserConsultas([]);
+            setFilteredUserConsultas([]);
             setUserDoctors([]);
             setSelectedSpecialtyFilter('');
         } else {
             setExpandedUserId(userId);
-            await fetchUserDetails(userId);
+            setSelectedSpecialtyFilter('');
+            
+            const details = await fetchUserDetails(userId);
+            if (details) {
+                setExpandedUserDetails(details);
+            }
+            
+            await fetchUserAppointments(userId);
+            await fetchUserDoctors(userId);
         }
     };
 
@@ -143,7 +197,13 @@ function UsersList({ user, token, showMessage }) {
      */
     const startEdit = (userToEdit) => {
         setEditUserId(userToEdit.id);
-        setEditName(userToEdit.name);
+        setEditUserName(userToEdit.name);
+        fetchUserDetails(userToEdit.id).then(details => {
+            if (details) {
+                setEditUserEmail(details.email);
+                setEditUserRole(details.role);
+            }
+        });
     };
 
     /**
@@ -154,7 +214,9 @@ function UsersList({ user, token, showMessage }) {
     const handleSaveEdit = async (userId) => {
         try {
             const payload = {
-                name: editName,
+                name: editUserName,
+                email: editUserEmail,
+                role: editUserRole
             };
 
             await api.put(`/users/${userId}`, payload, {
@@ -163,9 +225,11 @@ function UsersList({ user, token, showMessage }) {
             showMessage('Utilizador atualizado com sucesso!', 'success');
             setEditUserId(null);
             fetchUsers();
-
             if (expandedUserId === userId) {
-                await fetchUserDetails(userId);
+                const details = await fetchUserDetails(userId);
+                if (details) {
+                    setExpandedUserDetails(details);
+                }
             }
         } catch (err) {
             showMessage(err.response?.data?.error || 'Erro ao atualizar utilizador.', 'error');
@@ -190,6 +254,10 @@ function UsersList({ user, token, showMessage }) {
             if (expandedUserId === userId) {
                 setExpandedUserId(null);
                 setExpandedUserDetails(null);
+                setAllUserConsultas([]);
+                setFilteredUserConsultas([]);
+                setUserDoctors([]);
+                setSelectedSpecialtyFilter('');
             }
         } catch (err) {
             showMessage(err.response?.data?.error || 'Erro ao eliminar utilizador.', 'error');
@@ -210,11 +278,14 @@ function UsersList({ user, token, showMessage }) {
         }
 
         try {
+            const generatedGoogleId = generateUUID(); // Gerar um UUID para googleId
+
             const payload = {
                 name: newUserName,
                 email: newUserEmail,
+                //password: newUserPassword,
                 role: newUserRole,
-                google_id: newUserGoogleId || null
+                google_id: generatedGoogleId // Envia o UUID gerado
             };
 
             await api.post('/users', payload, {
@@ -223,8 +294,9 @@ function UsersList({ user, token, showMessage }) {
             showMessage('Utilizador adicionado com sucesso!', 'success');
             setNewUserName('');
             setNewUserEmail('');
-            setNewUserGoogleId('');
-            setNewUserRole('user');
+            //setNewUserPassword('');
+            setNewUserRole('patient');
+            // Não precisamos limpar newUserGoogleId, pois ele não é um estado gerido pelo usuário
             fetchUsers();
         } catch (err) {
             showMessage(err.response?.data?.error || 'Erro ao adicionar utilizador.', 'error');
@@ -232,50 +304,16 @@ function UsersList({ user, token, showMessage }) {
     };
 
     /**
-     * @brief Filtra as consultas do utilizador expandido por especialidade.
-     * @param {string} specialtyId - O ID da especialidade para filtrar (ou vazio para todas).
-     * @returns {Promise<void>}
+     * @brief Atualiza o filtro de especialidade. O filtro será aplicado automaticamente pelo useEffect.
+     * @param {Event} e - O evento de mudança do select.
+     * @returns {void}
      */
-    const handleFilterConsultasBySpecialty = async (specialtyId) => {
-        setSelectedSpecialtyFilter(specialtyId);
-        if (expandedUserId) {
-            try {
-                let url = `/users/${expandedUserId}/appointments`;
-                if (specialtyId) {
-                    url = `/users/${expandedUserId}/specialties/${specialtyId}/appointments`;
-                }
-
-                const filteredAppointmentsResponse = await api.get(url, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-
-                const formattedFilteredConsultas = filteredAppointmentsResponse.data.map(c => {
-                    const dateTimeString = `${c.date}T${c.time}`;
-                    const dateObj = new Date(dateTimeString);
-                    const dataDisplay = isNaN(dateObj.getTime()) ? 'Data Inválida' : dateObj.toLocaleString('pt-PT', {
-                        year: 'numeric', month: '2-digit', day: '2-digit',
-                        hour: '2-digit', minute: '2-digit', hour12: false
-                    });
-                    return {
-                        ...c,
-                        dataDisplay,
-                        medicoName: c.medico?.name || 'Médico Desconhecido',
-                        specialtyName: c.medico?.specialty?.name || 'Especialidade Desconhecida'
-                    };
-                });
-                setUserConsultas(formattedFilteredConsultas);
-            } catch (err) {
-                console.error('Erro ao filtrar consultas por especialidade:', err);
-                setUserConsultasError('Erro ao filtrar consultas por especialidade. ' + (err.response?.data?.error || ''));
-            }
-        }
-        if (!specialtyId && expandedUserId) {
-            await fetchUserDetails(expandedUserId);
-        }
+    const handleSpecialtyFilterChange = (e) => {
+        setSelectedSpecialtyFilter(e.target.value);
     };
 
     if (loading) return <div className="list-container"><div className="loading-message">A carregar utilizadores...</div></div>;
-    if (error) return <div className="list-container"><div className="error-message">{error}</div></div>;
+    if (error && !users.length) return <div className="list-container"><div className="error-message">{error}</div></div>;
 
     return (
         <div className="list-container">
@@ -302,22 +340,13 @@ function UsersList({ user, token, showMessage }) {
                             className="form-input"
                             required
                         />
-                    </div>
-                    <div className="form-row">
-                        <input
-                            type="text"
-                            placeholder="Google ID"
-                            value={newUserGoogleId}
-                            onChange={e => setNewUserGoogleId(e.target.value)}
-                            className="form-input"
-                        />
                         <select
                             value={newUserRole}
                             onChange={e => setNewUserRole(e.target.value)}
                             className="form-input"
                             required
                         >
-                            <option value="user">Utilizador</option>
+                            <option value="patient">Paciente</option>
                             <option value="admin">Admin</option>
                         </select>
                     </div>
@@ -326,6 +355,8 @@ function UsersList({ user, token, showMessage }) {
                     </button>
                 </form>
             )}
+
+            {error && users.length > 0 && <div className="error-message">{error}</div>}
 
             <div className="card-container">
                 <table>
@@ -345,8 +376,8 @@ function UsersList({ user, token, showMessage }) {
                                         {editUserId === u.id ? (
                                             <input
                                                 type="text"
-                                                value={editName}
-                                                onChange={e => setEditName(e.target.value)}
+                                                value={editUserName}
+                                                onChange={e => setEditUserName(e.target.value)}
                                                 className="form-input small"
                                             />
                                         ) : u.name}
@@ -354,6 +385,23 @@ function UsersList({ user, token, showMessage }) {
                                     <td>
                                         {editUserId === u.id ? (
                                             <>
+                                                <div className="edit-user-details" style={{display: 'flex', flexDirection: 'column', gap: '5px', marginBottom: '10px'}}>
+                                                    <input
+                                                        type="email"
+                                                        value={editUserEmail}
+                                                        onChange={e => setEditUserEmail(e.target.value)}
+                                                        className="form-input small"
+                                                        placeholder="Email"
+                                                    />
+                                                    <select
+                                                        value={editUserRole}
+                                                        onChange={e => setEditUserRole(e.target.value)}
+                                                        className="form-input small"
+                                                    >
+                                                        <option value="patient">Paciente</option>
+                                                        <option value="admin">Administrador</option>
+                                                    </select>
+                                                </div>
                                                 <button onClick={() => handleSaveEdit(u.id)} className="action-button save" title="Guardar">
                                                     <Save size={18} />
                                                 </button>
@@ -363,12 +411,16 @@ function UsersList({ user, token, showMessage }) {
                                             </>
                                         ) : (
                                             <>
-                                                <button onClick={() => startEdit(u)} className="action-button edit" title="Editar">
-                                                    <Edit size={18} />
-                                                </button>
-                                                <button onClick={() => handleDeleteUser(u.id)} className="action-button delete" title="Eliminar">
-                                                    <Trash2 size={18} />
-                                                </button>
+                                                {user?.role === 'admin' && (
+                                                    <>
+                                                        <button onClick={() => startEdit(u)} className="action-button edit" title="Editar">
+                                                            <Edit size={18} />
+                                                        </button>
+                                                        <button onClick={() => handleDeleteUser(u.id)} className="action-button delete" title="Eliminar">
+                                                            <Trash2 size={18} />
+                                                        </button>
+                                                    </>
+                                                )}
                                                 <button onClick={() => handleExpandUser(u.id)} className="action-button view" title="Ver Detalhes">
                                                     <Eye size={18} />
                                                 </button>
@@ -376,13 +428,14 @@ function UsersList({ user, token, showMessage }) {
                                         )}
                                     </td>
                                 </tr>
-                                {expandedUserId === u.id && expandedUserDetails && (
+                                {expandedUserId === u.id && (
                                     <tr>
-                                        <td colSpan="3"> {/* Ajustado colSpan para 3 colunas */}
+                                        <td colSpan="3">
                                             <div className="user-details-expanded-area">
-                                                <h4>Detalhes para {expandedUserDetails.name}</h4>
-                                                <p><strong>Email:</strong> {expandedUserDetails.email || 'N/A'}</p>
-                                                <p><strong>Perfil:</strong> {expandedUserDetails.role || 'N/A'}</p>
+                                                <h4>Detalhes para {expandedUserDetails?.name || u.name}</h4>
+                                                <p><strong>Email:</strong> {expandedUserDetails?.email || 'N/A'}</p>
+                                                <p><strong>Perfil:</strong> {expandedUserDetails?.role || 'N/A'}</p>
+
                                                 {userConsultasError && <div className="error-message">{userConsultasError}</div>}
                                                 <div className="user-details-cards-grid">
                                                     <div className="card">
@@ -390,7 +443,6 @@ function UsersList({ user, token, showMessage }) {
                                                         {userDoctors.length > 0 ? (
                                                             <div className="doctor-tags">
                                                                 {userDoctors.map(doc => (
-                                                                    // AQUI ESTÁ A MUDANÇA: Usando 'doctor-tag' para estilizar
                                                                     <span key={doc.id} className="doctor-tag">{doc.name}</span>
                                                                 ))}
                                                             </div>
@@ -403,7 +455,7 @@ function UsersList({ user, token, showMessage }) {
                                                         <h5 className="card-title">Consultas do Utilizador:</h5>
                                                         <select
                                                             value={selectedSpecialtyFilter}
-                                                            onChange={e => handleFilterConsultasBySpecialty(e.target.value)}
+                                                            onChange={handleSpecialtyFilterChange}
                                                             className="form-input small"
                                                             style={{ marginBottom: '10px' }}
                                                         >
@@ -412,16 +464,16 @@ function UsersList({ user, token, showMessage }) {
                                                                 <option key={s.id} value={s.id}>{s.name}</option>
                                                             ))}
                                                         </select>
-                                                        {userConsultas.length > 0 ? (
+                                                        {filteredUserConsultas.length > 0 ? (
                                                             <ul className="consultas-list-small">
-                                                                {userConsultas.map(c => (
+                                                                {filteredUserConsultas.map(c => (
                                                                     <li key={c.id} className="card-text small-text">
-                                                                        {c.dataDisplay} - {c.medicoName} ({c.specialtyName}) - Notas: {c.notes || 'N/A'}
+                                                                        {c.dataDisplay} - {c.medicoName} ({c.specialtyName || 'N/A'}) - Notas: {c.notes || 'N/A'}
                                                                     </li>
                                                                 ))}
                                                             </ul>
                                                         ) : (
-                                                            <p className="card-text">Nenhuma consulta encontrada para este utilizador (ou filtro).</p>
+                                                            <p className="card-text">Nenhuma consulta encontrada para este utilizador {selectedSpecialtyFilter ? `na especialidade selecionada` : ''}.</p>
                                                         )}
                                                     </div>
                                                 </div>
