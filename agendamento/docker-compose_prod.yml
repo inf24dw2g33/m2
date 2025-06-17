@@ -26,7 +26,7 @@ services:
 
   db:
     container_name: scheduler_db
-    image: inf24dw1g32/mysql:latest
+    image: mysql:8.0
     ports:
       - "3307:3306"
     environment:
